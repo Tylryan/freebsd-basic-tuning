@@ -1,0 +1,9 @@
+#!/bin/sh
+
+# A script that lists all entries of an 
+# entire section of the man pages.
+#
+# Usage: ./man_all [section-number]
+# Tyler Ryan, 2025
+
+ls /usr/local/share/man/man8 | sed "s/.8.gz//g"

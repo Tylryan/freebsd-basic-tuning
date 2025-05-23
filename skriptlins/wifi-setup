@@ -1,0 +1,26 @@
+#!/bin/sh
+
+# DESCRIPTION
+# 	Records a new a network configuration entry 
+# 	in /etc/wpa_supplicant.conf.
+# 	
+# Usage: ./wifi-setup "SSID" "PASSWORD"
+# NOTES
+# - Requires root privilege
+# - Is only required to be ran once for
+#   each SSID.
+
+
+DEST=/etc/wpa_supplicant.conf
+
+network_config="
+network={             \n
+	ssid=\"${1}\" \n
+	scan_ssid=0   \n
+	psk=\"${2}\"  \n
+	priority=5    \n
+}                     \n
+\n
+"
+
+echo -e $network_config >> $DEST

@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# DESCRIPTION
+# 	Lists all the output devices on the system.
+#	Use the "pmi" number when referencing an
+#	output device. For example, "pmi0" would be
+#	referenced as just "0".
+#	
+
+# mixer -a: If you have mixer
+cat /dev/sndstat

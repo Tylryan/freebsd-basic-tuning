@@ -1,0 +1,5 @@
+#!/bin/sh
+
+# Active services are specified
+# in the rc.conf file.
+service -l

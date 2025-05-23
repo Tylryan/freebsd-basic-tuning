@@ -1,0 +1,20 @@
+#!/bin/sh
+
+# DESCRIPTION
+# 	Set the maximum allowed buffer space to 5MB. This 
+# 	will greatly reduce the amount of "wasted" Wired 
+# 	Memory.
+# USAGE
+# 	./reduce-wired-memory-usage
+# NOTES
+# - Requires super user privileges.
+# - The 5MB number can easily be tweaked.
+# - The original value was 10% of hw.realmem
+
+KB=1024
+MB=$((KB*KB))
+
+res=$((5 * MB))
+
+echo "vfs.maxbufspace=${res}" >> /boot/loader.conf
+echo "vfs.maxbufspace=${res}" >> /etc/sysctl.conf

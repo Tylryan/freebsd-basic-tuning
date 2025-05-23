@@ -1,0 +1,16 @@
+#!/bin/sh
+
+# DESCRIPTION
+# 	Sets the audio output to a given 'pcm'.
+# Usage: audio (0 | 1)
+# 0: computer speakers
+# 1: headphones
+#
+# To make this permanent, add `hw.snd.default_unit=N`
+# to the /etc/sysctl.conf
+
+
+# mixer -d pcm$1
+sysctl hw.snd.default_unit=$1
+
+

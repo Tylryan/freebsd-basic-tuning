@@ -1,0 +1,12 @@
+#!/bin/sh
+
+
+sysctl -da
+
+
+# NOTE 1(tyler): To describe a subsection, simply
+# specify with `sysctl -d <subsection>`.
+# Eg. `sysctl -d hw`
+
+# NOTE 2(tyler): Use grep to narrow down what you're
+# looking for. `./describe_kernel_state_options | grep hw`

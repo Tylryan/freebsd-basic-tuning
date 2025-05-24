@@ -1,0 +1,12 @@
+emacs
+en-freebsd-doc
+firefox
+htop
+kitty
+less
+neovim
+sudo
+vscode
+
+zathura
+zathura-pdf-mupdf

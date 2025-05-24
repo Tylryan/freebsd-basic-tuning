@@ -1,0 +1,148 @@
+#!/usr/local/bin/python3
+
+
+# This script should take a user from the bsdinstall (which
+# sets up a minimal operating system that is not ready to
+# be used as a personal computer in the modern day) to 
+# an MVP desktop environment.
+#
+# There is no login manager. After the user logs in via tty,
+# `startx` is ran bringing them to i3.
+# 
+# Currently runs on just 400 MB of ram. Compare to the original
+# value of 6.5 GB of ram "wasted" on Wired Memory.
+
+import os
+import sys
+from pprint import pprint
+
+
+class Config:
+    graphics_driver: str  = "intel"
+    reduce_memory  : bool = False
+    mount_proc     : bool = False
+    setup_xfat     : bool = False
+
+    def debug(self):
+        pprint(self.__dict__)
+
+
+global config
+config = Config()
+
+
+def main():
+    ensure_super_user()
+    configuration_prompts()
+
+
+    install_packages()
+    configure()
+
+    # Config Files
+    todo(".config files: Rofi, i3")
+    todo("setup i3 to use better applications. Rofi/Firefox/Terminal")
+
+    # To be able to watch youtube videos.
+    todo("enable pulseaudio.")
+    todo("setup .profile to startx upon login")
+    todo("throw setxkbmap -option caps:swapescape in .xinitrc.")
+    todo("setup .xinitrc to launch i3")
+
+    todo("reboot()")
+
+
+def configure() -> None:
+    global config
+
+    if config.graphics_driver: todo("setup_graphics_driver()") # setup_graphics_driver()
+    if config.reduce_memory  : todo("reduce_memory()")         # reduce_memory()
+    if config.mount_proc     : todo("mount_proc()")            # mount_proc()
+
+    todo("setup mount.xfat for mounting vfat usb sticks")
+
+    return None
+
+def configuration_prompts() -> None:
+    global config
+
+    config.graphics_driver = get_graphics_driver()
+    config.reduce_memory   = ask_reduce_memory()
+    config.mount_proc      = ask_mount_proc()
+
+
+def install_packages():
+    run(r"pkg install --dry-run --yes $(cat packages.txt | tr '\n' ' ')")
+
+
+def ask_mount_proc() -> bool:
+    while True:
+        msg = "Would you mount 'proc'? This is used by some " \
+              "Linux applications such as Gnome and KDE. [Y/n]: "
+        res: bool = input(msg).lower()
+        valid_answers: list[str] = ["y", "n", ""]
+
+        if res not in valid_answers:
+            err_msg = f"Please choose one of the following: {valid_answers}"
+            print(f"[error] {err_msg}")
+            continue
+
+        return True if res == "y" or res == "" else False
+
+def ask_reduce_memory() -> bool:
+    while True:
+        msg = "Would you like to reduce the amount of memory FreeBSD " \
+              "Allocates by default? [Y/n]: "
+        res: bool = input(msg).lower()
+        valid_answers: list[str] = ["y", "n", ""]
+
+        if res not in valid_answers:
+            err_msg = f"Please choose one of the following: {valid_answers}"
+            print(f"[error] {err_msg}")
+            continue
+
+        return True if res == "y" or res == "" else False
+
+def get_graphics_driver() -> str:
+    while True:
+        msg = "Choose a graphics driver. [intel, amd, nvidia]: "
+        graphics_driver: str = input(msg).lower()
+        valid_graphics_drivers: list[str] = ["intel", "amd", "nvidia"]
+
+        if graphics_driver not in valid_graphics_drivers:
+            err_msg = f"Please choose one of the following: {valid_graphics_drivers}"
+            print(f"[error] {err_msg}")
+            continue
+
+        return graphics_driver
+
+def run(cmd) -> None:
+    print(cmd)
+    os.system(cmd)
+    return None
+
+def error(msg) -> None:
+    print(msg)
+    exit(1)
+
+def ensure_super_user() -> None:
+    if is_super_user() is False:
+        err_msg = "This script must be ran as a super user. "\
+                  "Please run with either "                  \
+                  "`doas` or `sudo`."
+        error(err_msg)
+    return None
+
+def is_super_user() -> bool:
+    return int(os.getuid()) == 0
+
+def reboot():
+    os.system("reboot")
+
+def todo(msg):
+    print(f"TODO: {msg}")
+
+if __name__ == "__main__":
+    main()
+    #configuration_prompts()
+    config.debug()

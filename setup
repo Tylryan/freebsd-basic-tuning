@@ -64,6 +64,8 @@ def configure() -> None:
     if config.mount_proc     : todo("mount_proc()")
 
     todo("setup mount.xfat for mounting vfat usb sticks.")
+    todo("enable automount.")
+
     todo("setup ports and install a port manager.")
     todo("enable linux compatability: chapter 12.")
 
@@ -75,54 +77,65 @@ def configuration_prompts() -> None:
     config.graphics_driver = get_graphics_driver()
     config.reduce_memory   = ask_reduce_memory()
     config.mount_proc      = ask_mount_proc()
-    todo("prompt user if they would like to setup ports.")
-    todo("prompt user if they would like to enable Linux compatability.")
+    config.setup_ports     = ask_setup_ports()
+    config.linux_enable    = ask_linux_enable()
+    todo("ask user if they would like to enable automount.")
+
+def ask_linux_enable():
+    prompt = "Would you like to enable Linux compatability?"
+    return ask_loop_yes_no(prompt)
+
+def get_graphics_driver() -> str:
+    prompt = "Choose a graphics driver."
+    return ask_loop_choice(prompt, 
+                           "[Intel|amd|nvidia]", 
+                           ["intel", "amd", "nvidia", ""], 
+                           "intel")
+
+def ask_setup_ports():
+    prompt = "Would you like to setup ports?"
+    return ask_loop_yes_no(prompt)
+
+def ask_mount_proc() -> bool:
+    prompt = "Would you mount 'proc'? This is used by some " \
+          "Linux applications such as Gnome and KDE."
+    return ask_loop_yes_no(prompt)
+
+def ask_reduce_memory() -> bool:
+    prompt = "Would you like to reduce the amount of memory FreeBSD " \
+          "Allocates by default?"
+    return ask_loop_yes_no(prompt, "n")
+
+def ask_loop_yes_no(prompt: str, default: str = "y") -> bool:
+    box = "[Y/n]"
+    if default == "n": box = "[y/N]"
+    prompt: str = f"{prompt} {box}: "
+    return ask_loop(prompt, ["y", "n", ""], default)
+
+def ask_loop_choice(prompt: str, box: str, choices: str, default: str) -> str:
+    prompt = f"{prompt} {box}: "
+    return ask_loop(prompt, choices, default)
 
 
 def install_packages():
     run(r"pkg install --dry-run --yes $(cat packages.txt | tr '\n' ' ')")
 
 
-def ask_mount_proc() -> bool:
+def ask_loop(prompt: str, valid_answers: list[str], default_answer: str) -> bool | str:
     while True:
-        msg = "Would you mount 'proc'? This is used by some " \
-              "Linux applications such as Gnome and KDE. [Y/n]: "
-        res: bool = input(msg).lower()
-        valid_answers: list[str] = ["y", "n", ""]
+        choice: bool = input(prompt).lower()
+        if choice == "": choice = default_answer
 
-        if res not in valid_answers:
+        if choice not in valid_answers:
             err_msg = f"Please choose one of the following: {valid_answers}"
             print(f"[error] {err_msg}")
             continue
 
-        return True if res == "y" or res == "" else False
+        if choice == "y"  : return True
+        elif choice == "n": return False
+        elif choice == "" : return default_answer
 
-def ask_reduce_memory() -> bool:
-    while True:
-        msg = "Would you like to reduce the amount of memory FreeBSD " \
-              "Allocates by default? [Y/n]: "
-        res: bool = input(msg).lower()
-        valid_answers: list[str] = ["y", "n", ""]
-
-        if res not in valid_answers:
-            err_msg = f"Please choose one of the following: {valid_answers}"
-            print(f"[error] {err_msg}")
-            continue
-
-        return True if res == "y" or res == "" else False
-
-def get_graphics_driver() -> str:
-    while True:
-        msg = "Choose a graphics driver. [intel, amd, nvidia]: "
-        graphics_driver: str = input(msg).lower()
-        valid_graphics_drivers: list[str] = ["intel", "amd", "nvidia"]
-
-        if graphics_driver not in valid_graphics_drivers:
-            err_msg = f"Please choose one of the following: {valid_graphics_drivers}"
-            print(f"[error] {err_msg}")
-            continue
-
-        return graphics_driver
+        return choice
 
 def run(cmd) -> None:
     print(cmd)

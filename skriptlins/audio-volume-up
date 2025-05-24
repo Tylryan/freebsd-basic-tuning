@@ -1,0 +1,9 @@
+#!/bin/sh
+
+# USAGE
+# 	./this-script
+# DESCRIPTION
+# 	Turns the volume up...
+#	
+
+mixer vol=+10%

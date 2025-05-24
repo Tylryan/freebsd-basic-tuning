@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# USAGE
+#	./this-script
+#
+# DESCRIPTION
+# 	Prints the amount of physical memory on the computer.
+
+echo "Physical Memory"
+echo $(sysctl -n hw.physmem) Bytes

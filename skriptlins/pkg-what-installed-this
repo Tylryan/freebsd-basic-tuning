@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# USAGE
+# 	./this-script <file-name>
+#
 # DESCRIPTION
 # 	Given a file, this script shows which package installed it.
 #	
@@ -7,8 +10,6 @@
 #	one of the files. Then run `pkg info <package>` on the result
 #	to know more about what that package does. But watch out! you
 #	might learn something you didn't know you didn't know. :)
-# USAGE
-# 	./pkg-what-installed-this <file-name>
 # NOTES
 #
 

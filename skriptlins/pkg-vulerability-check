@@ -1,11 +1,12 @@
 #!/bin/sh
 
 
+# USAGE
+# 	./this-script
+#
 # DESCRIPTION
 # 	Searches your packages and displays the vulnerabilities in each package
 # 	if any.
-# USAGE
-# 	./pkg-vulerability-check
 # NOTES
 # 	- See ./pkg-list-dependencies to figure out which packages depend
 # 	  on the one's with vulnerabilities.

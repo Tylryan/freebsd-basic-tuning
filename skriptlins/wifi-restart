@@ -1,4 +1,13 @@
 #!/bin/sh
 
+# USAGE
+# 	./this-script
+#
+# DESCRIPTION
+# 	Restarts the internet...
+#
+# 	There's another script around here that tells you
+# 	all of the services you can enable.
+#
 
 service netif restart

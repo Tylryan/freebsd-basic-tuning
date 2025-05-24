@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# USAGE
+# 	./this-script
+#
+# DESCRIPTION
+# 	List all the active services on the computer.
+# NOTES
+
+service -e

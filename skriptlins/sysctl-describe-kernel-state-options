@@ -1,0 +1,32 @@
+#!/bin/sh
+
+# USAGE
+# 	./this-script
+#
+# DESCRIPTION
+# 	Gives a description of all the kernel state knobs
+# 	you can tweak in a "kernel.state: Description" 
+# 	format.
+#
+# 	From here, you can tweak those knobs by placing
+# 	a string at the end of either the /etc/sysctl.conf
+# 	or the /boot/loader.conf files in a
+# 	"kernel.state=VALUE" format.
+#
+# 	Suppose you run the `top` command and see that there's
+# 	only 800 megabytes free of 8 gigabytes. If you're the
+# 	kind of person who likes to see 7 gigabytes free, then
+# 	run the following commands to 'tune' FreeBSD to do so.
+#
+# 	1. Run `./this-script | grep vfs.maxbufspace`. This
+# 	   will tell you what the knob you're about to tweak
+# 	   does.
+# 	2. Run `echo vfs.maxbufspace="536870912" >> /etc/sysctl.conf`.
+# 	3. Reboot
+# NOTES
+# 	- To describe just once kernel state, 
+# 	  run `sysctl -d <kernel.state>
+# SEE
+# 	- https://docs.freebsd.org/en/books/handbook/config/
+
+sysctl -da

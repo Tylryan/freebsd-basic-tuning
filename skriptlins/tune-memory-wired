@@ -1,11 +1,12 @@
 #!/bin/sh
 
+# USAGE
+# 	./this-script
+#
 # DESCRIPTION
 # 	Set the maximum allowed buffer space to 5MB. This 
 # 	will greatly reduce the amount of "wasted" Wired 
 # 	Memory.
-# USAGE
-# 	./reduce-wired-memory-usage
 # NOTES
 # - Requires super user privileges.
 # - The 5MB number can easily be tweaked.

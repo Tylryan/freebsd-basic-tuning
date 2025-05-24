@@ -1,5 +1,12 @@
 #!/bin/sh
 
+# USAGE
+# 	./this-script
+#
+# DESCRIPTION
+# 	TODO
+# NOTES
+#
 # Active services are specified
 # in the rc.conf file.
 service -l

@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# USAGE
+# 	./this-script <user> <group>
+#
+# DESCRIPTION
+#	Adds a user ($1) to a group ($2).
+
+user=$1
+group=$2
+pw groupmod $group -m $user

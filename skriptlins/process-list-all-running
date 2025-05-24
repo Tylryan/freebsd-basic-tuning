@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# USAGE
+# 	./this-script
+#
+# DESCRIPTION
+# 	List all running processes...
+# NOTES
+
+ps -aux

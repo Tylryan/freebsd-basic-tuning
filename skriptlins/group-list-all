@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# USAGE
+#	./this-script
+#
+# DESCRIPTION
+#	Show all groups on the computer.
+#
+
+cat /etc/group

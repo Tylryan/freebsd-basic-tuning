@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# USAGE
+#	./this-script <section-number>
+#
+# DESCRIPTION
+# 	A script that lists all entries of an entire section 
+# 	of the man pages.
+
+ls /usr/local/share/man/man8 | sed "s/.8.gz//g"

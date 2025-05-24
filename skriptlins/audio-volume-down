@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# USAGE
+# 	./this-script
+#
+# DESCRIPTION
+# 	Turns the volume down...
+#	
+
+
+mixer vol=-10%

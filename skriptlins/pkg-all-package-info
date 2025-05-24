@@ -1,10 +1,12 @@
 #!/bin/sh
 
-# DESCRIPTION
-# 	Shows you the raw manifest file for a given package. This file
-# 	constains any information you might want to know about a package.
 # USAGE
-# 	./pkg-all-package-info <package-name>
+# 	./this-script <package-name>
+#
+# DESCRIPTION
+# 	Shows you the raw manifest file for a given package. 
+# 	This file constains any information you might want to 
+# 	know about a package.
 # NOTES
 #
 

@@ -1,0 +1,13 @@
+#!/bin/sh
+
+# USAGE
+# 	./this-script <percent>
+#
+# DESCRIPTION
+# 	Sets the system volume to a given percent.
+#	
+# EXAMPLE
+# 	$ ./this-script 100%
+
+
+mixer vol=$1

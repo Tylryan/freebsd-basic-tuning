@@ -1,10 +1,12 @@
 #!/bin/sh
 
+# USAGE
+# 	./this-script (0 | 1)
 # DESCRIPTION
 # 	Sets the audio output to a given 'pcm'.
-# Usage: audio (0 | 1)
-# 0: computer speakers
-# 1: headphones
+# 	For my computer that means:
+# 		0: computer speakers
+# 		1: headphones
 #
 # To make this permanent, add `hw.snd.default_unit=N`
 # to the /etc/sysctl.conf

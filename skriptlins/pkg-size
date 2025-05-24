@@ -1,9 +1,9 @@
 #!/bin/sh
 
+# USAGE
+# 	./this-script <package-name>
 # DESCRIPTION
 # 	Shows the size of a given package.
-# USAGE
-# 	./pkg-size <package-name>
 # NOTES
 #
 

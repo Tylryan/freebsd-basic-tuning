@@ -1,10 +1,11 @@
 #!/bin/sh
 
+# USAGE
+# 	./this-script "SSID" "PASSWORD"
+#
 # DESCRIPTION
 # 	Records a new a network configuration entry 
 # 	in /etc/wpa_supplicant.conf.
-# 	
-# Usage: ./wifi-setup "SSID" "PASSWORD"
 # NOTES
 # - Requires root privilege
 # - Is only required to be ran once for

@@ -1,9 +1,11 @@
 #!/bin/sh
 
+# USAGE
+# 	./this-script
 # DESCRIPTION
 # 	Lists all the output devices on the system.
 #	Use the "pmi" number when referencing an
-#	output device. For example, "pmi0" would be
+#	output device. For example, "pcm0" would be
 #	referenced as just "0".
 #	
 

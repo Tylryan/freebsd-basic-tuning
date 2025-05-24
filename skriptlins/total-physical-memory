@@ -1,5 +1,0 @@
-#!/bin/sh
-
-
-echo "Physical Memory"
-echo $(sysctl -n hw.physmem) Bytes

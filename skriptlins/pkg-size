@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# DESCRIPTION
+# 	Shows the size of a given package.
+# USAGE
+# 	./pkg-size <package-name>
+# NOTES
+#
+
+
+pkg info -s $1

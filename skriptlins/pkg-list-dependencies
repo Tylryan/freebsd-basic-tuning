@@ -1,0 +1,19 @@
+#!/bin/sh
+
+
+# DESCRIPTION
+# 	Lists all the packages that depend on the one passed
+#	to this command.
+# USAGE
+#	./pkg-list-dependencies <package-name>
+# NOTES
+# 	- If you find a vulerable package, check which other
+#	  packages depend on it with this command. If you
+#	  don't need those other packages. Delete this package
+#	  and those to remove the vulnerability.
+#
+
+
+
+
+pkg info -d $1

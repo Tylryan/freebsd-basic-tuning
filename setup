@@ -22,6 +22,8 @@ class Config:
     reduce_memory  : bool = False
     mount_proc     : bool = False
     setup_xfat     : bool = False
+    setup_ports    : bool = False
+    linux_enable   : bool = False
 
     def debug(self):
         pprint(self.__dict__)
@@ -33,18 +35,20 @@ config = Config()
 
 def main():
     ensure_super_user()
+    todo("check if user has internet. If not, set it up for them.")
+
     configuration_prompts()
-
-
     install_packages()
     configure()
+
 
     # Config Files
     todo(".config files: Rofi, i3")
     todo("setup i3 to use better applications. Rofi/Firefox/Terminal")
 
-    # To be able to watch youtube videos.
+    # To be able to watch youtube videos for example.
     todo("enable pulseaudio.")
+
     todo("setup .profile to startx upon login")
     todo("throw setxkbmap -option caps:swapescape in .xinitrc.")
     todo("setup .xinitrc to launch i3")
@@ -55,11 +59,13 @@ def main():
 def configure() -> None:
     global config
 
-    if config.graphics_driver: todo("setup_graphics_driver()") # setup_graphics_driver()
-    if config.reduce_memory  : todo("reduce_memory()")         # reduce_memory()
-    if config.mount_proc     : todo("mount_proc()")            # mount_proc()
+    if config.graphics_driver: todo("setup_graphics_driver()")
+    if config.reduce_memory  : todo("reduce_memory()")
+    if config.mount_proc     : todo("mount_proc()")
 
-    todo("setup mount.xfat for mounting vfat usb sticks")
+    todo("setup mount.xfat for mounting vfat usb sticks.")
+    todo("setup ports and install a port manager.")
+    todo("enable linux compatability: chapter 12.")
 
     return None
 
@@ -69,6 +75,8 @@ def configuration_prompts() -> None:
     config.graphics_driver = get_graphics_driver()
     config.reduce_memory   = ask_reduce_memory()
     config.mount_proc      = ask_mount_proc()
+    todo("prompt user if they would like to setup ports.")
+    todo("prompt user if they would like to enable Linux compatability.")
 
 
 def install_packages():

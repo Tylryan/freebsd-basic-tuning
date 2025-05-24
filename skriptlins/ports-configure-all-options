@@ -1,0 +1,22 @@
+#!/bin/sh
+
+# USAGE
+# 	./this-script
+#
+# DESCRIPTION
+#	When configuring port options, running this
+#	command will ask all the configuration questions
+#	upfront. That way you don't have to actually be
+#	staring at your computer waiting for a prompt
+#	while you compile your programs.
+#	
+# EXAMPLE
+#	$ cd /usr/ports/lang/python311/
+#	$ ./this-script
+#	$ make install clean
+
+
+make config-recursive
+
+
+

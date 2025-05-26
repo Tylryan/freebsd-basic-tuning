@@ -37,7 +37,7 @@
 # 	thing into my computer. It probably needs a driver!
 #
 # 4. Search web for wacom driver name and install it.
-pkg install xf86-input-wacom
+pkg install xf86-input-wacom wacomd
 
 # 5.0 Required by webcamd as per their man page. I don't know why this is not 
 #     mentioned when installing webcamd...

@@ -1,0 +1,56 @@
+#!/bin/sh
+
+# USAGE
+# 	doas ./this-script
+#
+# DESCRIPTION
+# 	Sets up a simple Wacom tablet like the Intuos.
+#
+# PLEASE READ
+# 	As of right now, you have to have the table connected to the computer
+# 	as the system is booting from a complete power off (no reboot) to get 
+# 	the pen to work. Working on this.
+#
+# NOTES
+# 	- Must be ran as root.
+# 	- Does not check if this script has been ran previously.
+#
+# TROUBLESHOOT WALKTHROUGH
+# 	I just plugged in my Wacom tablet. I wonder if my system registers that
+# 	I plugged the tablet in? 
+#
+# 	1. Check dmesg for something like "Wacom".
+# 	$ dmesg
+#
+# 	Idk. It's an external device right? What information can I get about it?
+# 	2. List all usb devices and search for one called.
+# 	"Wacom".
+# 	# usbconfig
+#
+# 	Ok. I found that it is "ugen1.2". So what more information can I find 
+# 	out about it?
+#
+# 	3. Get a all information the system knows about that device.
+# 	# usbconfig -d ugen1.2 dump_all_desc
+#
+# 	Ok that output looks Greek to me. Oh yeah! I just plugged an exteral 
+# 	thing into my computer. It probably needs a driver!
+#
+# 4. Search web for wacom driver name and install it.
+pkg install xf86-input-wacom
+
+# 5.0 Required by webcamd as per their man page. I don't know why this is not 
+#     mentioned when installing webcamd...
+echo "cuse_enable=\"YES\"" >> /boot/loader.conf
+
+# 5. Make sure the system knows to enable this service upon startup.
+sysrc webcamd_enable="YES"
+
+# 6. Stuff the driver maintainer/commenter asks us to do.
+pw groupmod webcamd -m $(whoami)
+service devd restart
+
+# 7. Unfortunately `service webcamd (one)start` doesn't work here, but powering
+#    off with the tablet plugged and back on with the tablet still plugged
+#    in should work.
+poweroff

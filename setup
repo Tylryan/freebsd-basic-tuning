@@ -18,6 +18,8 @@ from pprint import pprint
 
 global config
 
+RC_CONF = "/etc/rc.conf"
+
 
 # The desired options
 class Config:
@@ -126,7 +128,7 @@ class Prompt:
             if choice == "": choice = default_answer
 
             if choice not in valid_answers:
-                err_msg = f"Please choose one of the following: {valid_answers}"
+                err_msg = f"Please choose one of the following: {valid_answers}."
                 System.notify("p", err_msg)
                 continue
 
@@ -201,6 +203,18 @@ class System:
         expanded_stage: str = philter[stage]
         System.print(f"[{expanded_stage}] {msg}")
 
+    @staticmethod
+    def read_file(path: str) -> list[str]:
+        f = open(path, "r")
+        c = f.read()
+        f.close()
+
+        return c.split("\n")
+
+    @staticmethod
+    def kdl_list_add(val: str) -> None:
+        System.run("sysrc kdl_load+={val}")
+
 # The code to actually configure the user's
 # desired options.
 class Configure:
@@ -208,6 +222,7 @@ class Configure:
     @staticmethod
     def run() -> None:
         global config
+        System.notify("c", "Configuring the system based on user inputs.")
 
         if config.graphics_driver        : Configure.graphics_driver()
         if config.reduce_memory          : Configure.reduce_memory()
@@ -215,7 +230,6 @@ class Configure:
         if config.setup_ports            : Configure.setup_ports()
         if config.add_skriptlins_to_path : Configure.add_skriptlins_to_path()
 
-        System.notify("c", "Configuring the system based on user inputs.")
         todo("setup mount.xfat for mounting vfat usb sticks.")
         todo("enable automount.")
 
@@ -228,19 +242,20 @@ class Configure:
     @staticmethod
     def graphics_driver() -> None:
         global config
+        INTEL_MODULE: str = "i915kms"
+
         graphics_driver = config.graphics_driver
-        todo(f"configure graphics driver: '{graphics_driver}'.")
-        # Which kernel module?
-        intel_module: str = "i915kms"
-        #kld_list="i915kms"
+        System.notify("c", f"Configuring video driver for '{graphics_driver}'.")
 
-        def kdl_list_add(val: str) -> None:
-            #import os
-            #sysrc kld_load=+
-            pass
-        kdl_list_add("i915kms")
+        
+        value: list[str] | None = Conf.get_value(RC_CONF, "kld_list")
 
-        # Figure out which drivers we need
+        msg = f"Skipping: Not enabling '{INTEL_MODULE}' kernel module: 'load_list+=\"{INTEL_MODULE}\"' already in '/etc/rc.conf'."
+        if value:
+            System.notify("c", msg)
+            return
+
+        System.kdl_list_add(INTEL_MODULE)
         return None
 
     @staticmethod
@@ -271,7 +286,7 @@ class Configure:
     def setup_ports() -> bool:
         ports_dir = "/usr/ports"
         if os.path.exists(ports_dir):
-            System.notify("c", f"skipping 'setup_ports' as they are already installed.")
+            System.notify("c", f"Skipping: Not setting up ports. Directory already exists: '{ports_dir}'.")
             return False
 
         System.run("git clone https://git.freebsd.org/ports.git /usr/ports")
@@ -283,7 +298,7 @@ class Configure:
         skriptlins_source_dir = "./{skriptlins}"
 
         from glob import glob
-        skriptlins_source: list[str] = glob("{skriptlins_source_dir}/*")
+        skriptlins_source: list[str] = glob(f"{skriptlins_source_dir}/*")
 
         #skriptlins_source = f"./{skriptlins}"
         # Only command I know that will get you the name of the user who
@@ -293,22 +308,13 @@ class Configure:
 
         bashrc_path = f"{user_home}/.bashrc"
 
-        def read_file(path: str) -> list[str]:
-            f = open(path, "r")
-            c = f.read()
-            f.close()
 
-            return c.split("\n")
-
-        def contains_skriptlin_export(file_contents: str, cmd: str) -> bool:
-            for line in file_contents:
-                if line.strip() == cmd:
-                    return True
-            return False
+        def contains_skriptlin_export(file_path: str, cmd: str) -> bool:
+            return Conf.contains_exact_line(file_path, cmd)
 
         def copy_skriptlins_to_local_bin():
             if os.path.exists(skriptlins_dst):
-                System.notify("c", f"skipping copy_skriptlins_to_local_bin() as they are already there.")
+                System.notify("c", f"Skipping: Not copying skriptlins over to '{skriptlins_dst}'. Directory already exists.")
                 return
 
             System.run(f"cp -R {skriptlins_source} {skriptlins_dst}")
@@ -318,10 +324,10 @@ class Configure:
             PATH: list[str] = os.environ["PATH"]
             CMD: str = f"echo export PATH=\$PATH:{skriptlins_dst} >> {bashrc_path}"
             # Geez...
-            raw_cmd: str = " ".join(CMD.split()[1:3]).replace("\\", "")
+            export_cmd: str = " ".join(CMD.split()[1:3]).replace("\\", "")
 
-            if contains_skriptlin_export(read_file(bashrc_path), raw_cmd):
-                System.notify("c", f"skipping add_skriptlins_to_path() as they are already there.")
+            if contains_skriptlin_export(bashrc_path, export_cmd):
+                System.notify("c", f"Skipping: Not exporting skriptlins path: '{export_cmd}' is already in '{bashrc_path}'.")
                 return
 
             # Took me a second to figure out why the whole path was being piped
@@ -335,10 +341,55 @@ class Configure:
         return
 
 
+class Conf:
+    @staticmethod
+    def key_exists(conf_path: str, needle_key) -> bool:
+        def fn(haystack_key: str):
+            return needle_key == haystack_key
+
+        return Conf.search(conf_path, fn)[0]
+
+    @staticmethod
+    def get_value(conf_path: str, needle_key: str) -> list[str] | None:
+        def fn(haystack_key: str):
+            return needle_key == haystack_key
+
+        return Conf.search(conf_path, fn)[1]
+
+
+    @staticmethod
+    def search(conf_path: str, condition_fn) -> tuple[bool, list[str] | None]:
+        conf: list[str] = System.read_file(conf_path)
+
+        for line in conf:
+            conf_sp: list[str] = line.split("=")
+            if len(conf_sp) != 2:
+                continue
+            haystack_key, value = conf_sp
+            if condition_fn(haystack_key):
+                return (True, Conf.value_from(value))
+
+        return (False, None)
+
+    @staticmethod
+    def contains_exact_line(file_path: str, line: str) -> bool:
+        file_contents: list[str] = System.read_file(file_path)
+        for line in file_contents:
+            if line.strip() == line:
+                return True
+        return False
+
+
+    @staticmethod
+    def value_from(raw_string: str) -> list[str]:
+        return [ value.replace("\"", "") for value in raw_string.split(" ") ]
+
 
 def todo(msg):
     System.notify("t", msg)
 
 if __name__ == "__main__":
     #Configure.add_skriptlins_to_path()
+    #print(Conf.get_value("/etc/rc.conf", "kld_list"))
+
     main()

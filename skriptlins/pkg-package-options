@@ -4,9 +4,8 @@
 # 	./this-script [package-name]
 #
 # DESCRIPTION
-#	Tells you all the knobs you can tweak for a given package.
-#	(I'm pretty sure you can tweak these options even when you're 
-#	downloading a package using `pkg`.)
+#	Tells you all the knobs you can tweak for a given package if installed
+#	via ports.
 #
 # EXAMPLES
 #	Firstly, the most basic example. This will output every option for

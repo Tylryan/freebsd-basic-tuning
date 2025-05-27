@@ -307,18 +307,18 @@ class Configure:
         # NOTE: Here's I'm defining custom keyboard options. 
         # TODO(tyler): This could be a global variable that is easier to configure.
 
+        pulse_audio = "pulseaudio --start"
         swap_caps_with_escape = "setxkbmap -option caps:swapescape"
+
+        # Should be last command in the /etc/rc.conf file.
         exec_i3 = "exec i3"
 
-        if Conf.contains_exact_line(xinitrc_personal, swap_caps_with_escape):
-            System.notify("c", f"Skipping: Not adding '{swap_caps_with_escape}' to ~/.xinitrc: Already configured.")
-        else:
-            System.file_append(xinitrc_personal, "setxkbmap -option caps:swapescape")
+        Conf.append_line(xinitrc_personal, pulse_audio)
+        Conf.append_line(xinitrc_personal, swap_caps_with_escape)
+        Conf.append_line(xinitrc_personal, exec_i3)
 
-        if Conf.contains_exact_line(xinitrc_personal, exec_i3):
-            System.notify("c", f"Skipping: Not adding '{exec_i3} to ~/.xinitrc: Already configured.")
-        else:
-            System.file_append(xinitrc_personal, exec_i3, newline=False)
+        return None
+
 
 
 class Conf:
@@ -367,6 +367,15 @@ class Conf:
                 return True
         return False
 
+
+    @staticmethod
+    def append_line(conf_path: str, line: str) -> bool:
+        if Conf.contains_exact_line(conf_path, line):
+            System.notify("c", f"Skipping: Not adding '{line}' to '{conf_path}': Already configured.")
+            return False
+
+        System.file_append(conf_path, line)
+        return True
 
     @staticmethod
     def value_from(raw_string: str) -> list[str]:
@@ -459,7 +468,7 @@ class System:
         assert os.path.exists(file_path)
 
         f = open(file_path, "a")
-        if newline: f.write(f"\n{to_append}")
+        if newline: f.write(f"\n{to_append}\n")
         else      : f.write(to_append)
         f.close()
 
@@ -471,6 +480,4 @@ def todo(msg):
 
 
 if __name__ == "__main__":
-    #Configure.reduce_memory()
-    #System.file_append("hello.txt", "hello")
     main()

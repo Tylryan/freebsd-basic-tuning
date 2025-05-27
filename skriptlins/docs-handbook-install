@@ -1,0 +1,44 @@
+#!/bin/sh
+
+
+# USAGE
+#	doas ./this-script
+#
+# DESCRIPTION
+#	Downloads the FreeBSD Handbook (documentation).
+#
+# NOTES
+# - If you would like to know all the language code options, run:
+#   	pkg search --regex "freebsd-doc"
+#
+
+
+set -x
+
+LANGUAGE_CODE="en"
+DOWNLOAD_DIR=/usr/local/share/doc/freebsd/${LANGUAGE_CODE}/books/
+HANDBOOK_PATH=/home/$(users)/freebsd-handbook.ln
+LOG=./__temp.log
+
+# Install the Handbook
+pkg install -y ${LANGUAGE_CODE}-freebsd-doc
+
+# Put a link to it in a more convenient location.
+ln -s $DOWNLOAD_DIR $HANDBOOK_PATH 2> $LOG
+
+
+
+# If the link command fails, then let the user know why.
+if [ $? != 0 ];then
+	set +x
+	printf "\n\n[ERROR] $(cat $LOG)"
+	rm $LOG
+	printf "\nFailed to link file to a more convenient location, but the handbook should be installed at ${DOWNLOAD_DIR}.\n"
+	exit 1
+fi
+
+set +x
+echo "
+The FreeBSD Handbook has been installed: ${HANDBOOK_PATH}"
+
+

@@ -1,0 +1,19 @@
+#!/bin/sh
+
+
+# USAGE
+#	doas ./this-script
+#
+# DESCRIPTION
+#	Given a time-string, set the date and time.
+#	
+#   time-string: "yymmddHHMM"
+#
+
+# doas date 052615422025.00
+read -p "yy: " year
+read -p "mm: " month
+read -p "dd: " day
+read -p "HH: " hour
+read -p "MM: " minute
+date ${year}${month}${day}${hour}${minute}

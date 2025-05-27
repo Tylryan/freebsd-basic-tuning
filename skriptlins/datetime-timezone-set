@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# USAGE
+#	doas ./this-script
+#
+# DESCRIPTION
+#	Sets the timezone of the computer.
+
+
+tzsetup

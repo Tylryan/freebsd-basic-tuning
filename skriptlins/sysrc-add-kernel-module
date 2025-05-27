@@ -1,0 +1,23 @@
+#!/bin/sh
+
+# USAGE
+# 	doas ./this-script
+#
+# DESCRIPTION
+# 	Appends a kernel module to 'kld_list' in the /etc/rc.conf.
+#
+# EXAMPLE
+#	Suppose our computer uses an intel graphics card. We would want make 
+#	sure that our computer has kernel support for it. In order to add this
+#	support, we would run the following command:
+#	
+#	$ doas ./this-script i915kms
+#	
+#	If you wanted to pass multiple values, you'd use this format.
+#	$ doas ./this-script "val_one val_two"
+#
+
+key=$1
+value=$2
+
+sysrc $key += $value

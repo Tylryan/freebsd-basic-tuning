@@ -1,0 +1,11 @@
+#!/bin/sh
+
+
+# USAGE
+#	./this-script <user>
+# DESCRIPTION
+# 	List all groups a user ($1) is a part of.
+
+
+user=$1
+groups $user

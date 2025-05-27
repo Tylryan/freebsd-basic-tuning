@@ -17,5 +17,4 @@ MB=$((KB*KB))
 
 res=$((5 * MB))
 
-echo "vfs.maxbufspace=${res}" >> /boot/loader.conf
 echo "vfs.maxbufspace=${res}" >> /etc/sysctl.conf

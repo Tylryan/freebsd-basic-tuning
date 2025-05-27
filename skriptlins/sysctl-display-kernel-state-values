@@ -4,14 +4,8 @@
 # 	./this-script
 #
 # DESCRIPTION
-# 	Gives a description of all the kernel state knobs
-# 	you can tweak in a "kernel.state: Description" 
-# 	format.
-#
-# 	From here, you can tweak those knobs by placing
-# 	a string at the end of either the /etc/sysctl.conf
-# 	or the /boot/loader.conf files in a
-# 	"kernel.state=VALUE" format.
+# 	Provides the default values set for the kernel state
+# 	knobs you can tweak in a "kernel.state=VALUE" format.
 #
 # 	Suppose you run the `top` command and see that there's
 # 	only 800 megabytes free of 8 gigabytes. If you're the
@@ -25,8 +19,8 @@
 # 	3. Reboot
 # NOTES
 # 	- To describe just once kernel state, 
-# 	  run `sysctl -d <kernel.state>
+# 	  run `sysctl -aeh <kernel.state>
 # SEE
 # 	- https://docs.freebsd.org/en/books/handbook/config/
 
-sysctl -adh
+sysctl -aeh

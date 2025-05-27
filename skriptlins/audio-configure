@@ -1,0 +1,20 @@
+#!/bin/sh
+
+
+# USAGE
+# 	doas ./this-script
+#
+# DESCRIPTION
+# 	Should enable sound assuming you've set the rest up
+# NOTES
+# - Haven't tested it yet.
+# - Requires a poweroff/reboot
+
+# Enable sound kernel module
+echo snd_hda_load="YES" >> /boot/loader.conf
+
+# Enable the sound driver
+sysrc snd_driver_load="YES"
+
+# Enables sound daemon
+service sndiod enable

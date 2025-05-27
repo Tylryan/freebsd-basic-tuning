@@ -1,0 +1,12 @@
+#!/bin/sh
+
+# USAGE
+# 	./this-script
+#
+# DESCRIPTION
+# 	Removes the config for the port you're currently
+#	in.
+#	Useful for when you mess a config up and want to
+#	restart.
+
+make rmconfig

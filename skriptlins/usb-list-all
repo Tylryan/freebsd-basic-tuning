@@ -1,0 +1,12 @@
+#!/bin/sh
+# USAGE
+# 	./this-script
+#
+# DESCRIPTION
+# 	List all USB devices on this computer.
+#
+# NEXT STEPS
+# 	- Read the man pages for `usbconfig` to figure out how to
+# 	  turn on/off a specified USB device.
+
+usbconfig

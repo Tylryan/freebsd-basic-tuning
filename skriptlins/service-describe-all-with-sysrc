@@ -1,0 +1,19 @@
+#!/bin/sh
+# USAGE
+# 	./this-script
+#
+# DESCRIPTION
+# 	Displays a "list of all configuration variables (incl. defaults)" as
+# 	well as their default values and descriptions.
+#
+# 	Knowing these values and what they mean allow you to know how
+# 	to tweak the /etc/sysrc.conf file
+#
+# NOTES
+# - To describe just once kernel state, run `sysctl -d <service>`
+# SEE
+# - sysrc man page  : SYSRC(8)
+# - rc.conf man page: RC.CONF(5)
+
+
+sysrc -ADd

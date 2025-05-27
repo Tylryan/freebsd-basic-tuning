@@ -1,0 +1,13 @@
+#!/bin/sh
+# USAGE
+# 	./this-script
+#
+# DESCRIPTION
+# 	List all PCI devices and their drivers.
+#
+# FORMAT DESCRIPTION
+#     driver  selector        class   rev hdr vendor device subven subdev
+#     foo0   @pci0:0:4:0:     010000  01  00  1000   000f   0000   0000
+#     bar0   @pci0:0:5:0:     000100  00  00  88c1   5333   0000   0000
+#     none0  @pci0:0:6:0:     020000  00  00  10ec   8029   0000   0000
+pciconf -lv

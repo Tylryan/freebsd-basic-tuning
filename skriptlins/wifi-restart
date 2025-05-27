@@ -1,13 +1,16 @@
 #!/bin/sh
 
 # USAGE
-# 	./this-script
+# 	doas ./this-script
 #
 # DESCRIPTION
-# 	Restarts the internet...
+# 	Restarts the internet.
 #
 # 	There's another script around here that tells you
 # 	all of the services you can enable.
+#
+# NOTES
+# 	- Wait about 30 seconds for the wifi to reconnect.
 #
 
 service netif restart

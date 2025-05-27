@@ -1,0 +1,30 @@
+#!/bin/sh
+
+# USAGE
+# 	./this-script [package-name]
+#
+# DESCRIPTION
+#	Tells you all the knobs you can tweak for a given package.
+#	(I'm pretty sure you can tweak these options even when you're 
+#	downloading a package using `pkg`.)
+#
+# EXAMPLES
+#	Firstly, the most basic example. This will output every option for
+#	every installed package on the system.
+#	$ ./this-script
+#	
+#	The second example will output all the options for Emacs.
+#	$ ./this-script emacs
+#	
+# 	The third and final example is a bit more "real". Look at the options 
+#	for firefox and, as of version 39.0,2, you should notice that the 
+#	maintainer has set the "DBUS", "PULSAUDIO", and "SNDIO" options to "on". 
+#	So, If you don't have dbus_enable="YES", "pulseaudio" installed and setup, 
+# 	or "sndiod_enable="YES", then you probably won't hear any audio from 
+#	firefox.
+
+if [ -n $1 ];then
+	pkg options $1
+else
+	pkg options
+fi

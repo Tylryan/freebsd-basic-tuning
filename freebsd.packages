@@ -1,18 +1,44 @@
+# The setup script requires that the following variables are declared:
+# - `minimal_packages: set[str]`
+# - `extra_packages: set[str]`
+# Other than that though, this file can contain any valid Python expression.
+
+# These are the packages requred for the script/system to run.
 minimal_packages = (
-	"doas"          ,
-	"en-freebsd-doc",
-	"git"           ,
-	"i3"            ,
-	"i3lock-color"  ,
-	"i3status"      ,
-	"pkg"           ,
+	# "git"           , # Should already be installed before running the setup script.
+	# "pkg"           , # Probably already installed.
+	"doas"          , # Probably already installed, but just to make sure.
+	"en-freebsd-doc", # Useful documentation.
+	"i3"            , # Easy to use window manager.
+	"i3lock-color"  , # Used to lock your computer.
+	"i3status"      , # The bar at the bottom/top of your screen.
 	"portconfig"    ,
-	"pulseaudio"    ,
-	"python311"     ,
-	"rofi"          ,
-	"xorg"          ,
+	"pulseaudio"    , # Required for playing audio in the browser.
+	"python311"     , # Required to even run the setup script.
+	"rofi"          , # "A window switcher, application launcher, ssh dialog, dmenu replacement and more".
+	"xorg"          , 
 	"xorg-server"   ,
 )
 
 
-extra_packages = ()
+# These are the additional package a user can define which will be installed
+# by the setup script.
+extra_packages = (
+	# ----- Text Editors
+	"emacs"            ,
+	"neovim"           ,
+	"vscode"           ,
+
+	# ----- Admin Tools
+	"hw-probe"         , # Provides a ton of info about your hardware.
+	"sudo"             , # Alternative to `doas`.
+	"htop"             , # Alternative to `top`.
+	"less"             , # Alternative to `more`.
+	"kitty"            , # Alternative to `xterm`.
+	"py311-tldr"       , # Gives you the 'quick-and-dirty' of a command.
+
+	# --------- Other Applications
+	"firefox"          , # Web Browser
+	"zathura"          , # A simple Document viewer.
+	"zathura-pdf-mupdf", # Support for PDF.
+)

@@ -1,4 +1,4 @@
-#!/usr/local/bin/python3
+#!/usr/local/bin/python3.11
 
 
 # This script should take a user from the bsdinstall (which
@@ -16,7 +16,10 @@ import os
 import sys
 from pprint import pprint
 
+global config
 
+
+# The desired options
 class Config:
     graphics_driver: str  = "intel"
     reduce_memory  : bool = False
@@ -24,22 +27,19 @@ class Config:
     setup_xfat     : bool = False
     setup_ports    : bool = False
     linux_enable   : bool = False
+    add_skriptlins_to_path     : bool = False
 
     def debug(self):
         pprint(self.__dict__)
 
-
-global config
 config = Config()
-
-
 def main():
-    ensure_super_user()
+    User.ensure_super_user()
     todo("check if user has internet. If not, set it up for them.")
 
-    configuration_prompts()
-    install_packages()
-    configure()
+    Prompt.run()
+    System.install_packages()
+    Configure.run()
 
 
     # Config Files
@@ -56,114 +56,278 @@ def main():
     todo("reboot()")
 
 
-def configure() -> None:
-    global config
+class Prompt:
 
-    if config.graphics_driver: todo("setup_graphics_driver()")
-    if config.reduce_memory  : todo("reduce_memory()")
-    if config.mount_proc     : todo("mount_proc()")
+    @staticmethod
+    def run() -> None:
+        global config
 
-    todo("setup mount.xfat for mounting vfat usb sticks.")
-    todo("enable automount.")
+        config.graphics_driver = Prompt.graphics_driver()
+        config.reduce_memory   = Prompt.reduce_memory()
+        config.mount_proc      = Prompt.mount_proc()
+        config.setup_ports     = Prompt.setup_ports()
+        config.linux_enable    = Prompt.linux_enable()
+        config.add_skriptlins_to_path = Prompt.add_skriptlins_to_path()
+        todo("ask user if they would like to enable automount.")
 
-    todo("setup ports and install a port manager.")
-    todo("enable linux compatability: chapter 12.")
+        print()
 
-    return None
+    @staticmethod
+    def add_skriptlins_to_path():
+        prompt = "Would you like to add the 'skriptlins' directory to your path?"
+        return Prompt.yes_no_loop(prompt)
 
-def configuration_prompts() -> None:
-    global config
+    @staticmethod
+    def linux_enable():
+        prompt = "Would you like to enable Linux compatability?"
+        return Prompt.yes_no_loop(prompt)
 
-    config.graphics_driver = get_graphics_driver()
-    config.reduce_memory   = ask_reduce_memory()
-    config.mount_proc      = ask_mount_proc()
-    config.setup_ports     = ask_setup_ports()
-    config.linux_enable    = ask_linux_enable()
-    todo("ask user if they would like to enable automount.")
+    @staticmethod
+    def graphics_driver() -> str:
+        prompt = "Choose a graphics driver."
+        return Prompt.choice_loop(prompt, 
+                               "[Intel|amd|nvidia]", 
+                               ["intel", "amd", "nvidia", ""], 
+                               "intel")
+    @staticmethod
+    def setup_ports():
+        prompt = "Would you like to setup ports?"
+        return Prompt.yes_no_loop(prompt)
 
-def ask_linux_enable():
-    prompt = "Would you like to enable Linux compatability?"
-    return ask_loop_yes_no(prompt)
+    @staticmethod
+    def mount_proc() -> bool:
+        prompt = "Would you mount 'proc'? This is used by some " \
+              "Linux applications such as Gnome and KDE."
+        return Prompt.yes_no_loop(prompt)
 
-def get_graphics_driver() -> str:
-    prompt = "Choose a graphics driver."
-    return ask_loop_choice(prompt, 
-                           "[Intel|amd|nvidia]", 
-                           ["intel", "amd", "nvidia", ""], 
-                           "intel")
+    @staticmethod
+    def reduce_memory() -> bool:
+        prompt = "Would you like to reduce the amount of memory FreeBSD " \
+              "Allocates by default?"
+        return Prompt.yes_no_loop(prompt, "n")
 
-def ask_setup_ports():
-    prompt = "Would you like to setup ports?"
-    return ask_loop_yes_no(prompt)
+    # ------ Helpers
+    @staticmethod
+    def yes_no_loop(prompt: str, default: str = "y") -> bool:
+        box = "[Y/n]"
+        if default == "n": box = "[y/N]"
+        prompt = f"{prompt} {box}: "
+        return bool(Prompt.loop(prompt, ["y", "n", ""], default))
 
-def ask_mount_proc() -> bool:
-    prompt = "Would you mount 'proc'? This is used by some " \
-          "Linux applications such as Gnome and KDE."
-    return ask_loop_yes_no(prompt)
+    @staticmethod
+    def choice_loop(prompt: str, box: str, choices: list[str], default: str) -> str:
+        prompt = f"{prompt} {box}: "
+        return str(Prompt.loop(prompt, choices, default))
 
-def ask_reduce_memory() -> bool:
-    prompt = "Would you like to reduce the amount of memory FreeBSD " \
-          "Allocates by default?"
-    return ask_loop_yes_no(prompt, "n")
+    @staticmethod
+    def loop(prompt: str, valid_answers: list[str], default_answer: str) -> bool | str:
+        while True:
+            choice: str = input(prompt).lower()
+            if choice == "": choice = default_answer
 
-def ask_loop_yes_no(prompt: str, default: str = "y") -> bool:
-    box = "[Y/n]"
-    if default == "n": box = "[y/N]"
-    prompt: str = f"{prompt} {box}: "
-    return ask_loop(prompt, ["y", "n", ""], default)
+            if choice not in valid_answers:
+                err_msg = f"Please choose one of the following: {valid_answers}"
+                print(f"[error] {err_msg}")
+                continue
 
-def ask_loop_choice(prompt: str, box: str, choices: str, default: str) -> str:
-    prompt = f"{prompt} {box}: "
-    return ask_loop(prompt, choices, default)
+            if choice == "y"  : return True
+            elif choice == "n": return False
+            elif choice == "" : return default_answer
+
+            return choice
+
+class User:
+
+    @staticmethod
+    def ensure_super_user() -> None:
+        if User.is_super_user() is False:
+            err_msg = "This script must be ran as a super user. "\
+                      "Please run with either "                  \
+                      "`doas` or `sudo`."
+            System.error(err_msg)
+        return None
+
+    @staticmethod
+    def is_super_user() -> bool:
+        return int(os.getuid()) == 0
+
+    @staticmethod
+    def get_name() -> str:
+        return os.popen("users").read().strip()
+
+    @staticmethod
+    def get_home() -> str:
+        user: str = User.get_name()
+        return f"/home/{user}"
 
 
-def install_packages():
-    run(r"pkg install --dry-run --yes $(cat packages.txt | tr '\n' ' ')")
+flush = sys.stdout.flush
+
+# Code section to get/set/display system information/commands
+class System:
+    @staticmethod
+    def run(cmd) -> None:
+        print(cmd)
+        os.system(cmd)
+        return None
+
+    @staticmethod
+    def error(msg) -> None:
+        print(msg)
+        exit(1)
+
+    @staticmethod
+    def reboot():
+        os.system("reboot")
+
+    @staticmethod
+    def install_packages():
+        System.run(r"pkg install --dry-run --yes $(cat packages.txt | tr '\n' ' ')")
+
+    @staticmethod
+    def print(msg):
+        print(msg)
+        flush()
+
+# The code to actually configure the user's
+# desired options.
+class Configure:
+
+    @staticmethod
+    def run() -> None:
+        global config
+
+        if config.graphics_driver        : Configure.graphics_driver()
+        if config.reduce_memory          : Configure.reduce_memory()
+        if config.mount_proc             : Configure.mount_proc()
+        if config.setup_ports            : Configure.setup_ports()
+        if config.add_skriptlins_to_path : Configure.add_skriptlins_to_path()
+
+        todo("setup mount.xfat for mounting vfat usb sticks.")
+        todo("enable automount.")
+
+        todo("setup ports and install a port manager.")
+        todo("enable linux compatability: chapter 12.")
+
+        return None
+
+    
+    @staticmethod
+    def graphics_driver() -> None:
+        global config
+        graphics_driver = config.graphics_driver
+        todo(f"configure graphics driver: '{graphics_driver}'.")
+        # Which kernel module?
+        intel_module: str = "i915kms"
+        #kld_list="i915kms"
+
+        def kdl_list_add(val: str) -> None:
+            #import os
+            #sysrc kld_load=+
+            pass
+        kdl_list_add("i915kms")
+
+        # Figure out which drivers we need
+        return None
+
+    @staticmethod
+    def reduce_memory() -> None: 
+        global config
+        todo("configure freebsd to use less memory.")
+        return None
+
+    @staticmethod
+    def mount_proc() -> None:
+        global config
+        todo("mount proc.")
+        return None
+
+    @staticmethod
+    def xfat() -> None:
+        global config
+        todo("configure xfat support.")
+        return None
+
+    @staticmethod
+    def linux_compatability():
+        global config
+        todo("configure linux compatability.")
+        return None
+
+    @staticmethod
+    def setup_ports() -> bool:
+        ports_dir = "/usr/ports"
+        if os.path.exists(ports_dir):
+            System.print(f"skipping 'setup_ports' as they are already installed.")
+            return False
+
+        System.run("git clone https://git.freebsd.org/ports.git /usr/ports")
+        return True
+
+    @staticmethod
+    def add_skriptlins_to_path():
+        skriptlins            = "skriptlins"
+        skriptlins_source_dir = "./{skriptlins}"
+
+        from glob import glob
+        skriptlins_source: list[str] = glob("{skriptlins_source_dir}/*")
+
+        #skriptlins_source = f"./{skriptlins}"
+        # Only command I know that will get you the name of the user who
+        # ran `doas` is `users`.
+        user_home: str = User.get_home()
+        skriptlins_dst    = f"{user_home}/.local/bin/{skriptlins}"
+
+        bashrc_path = f"{user_home}/.bashrc"
+
+        def read_file(path: str) -> list[str]:
+            f = open(path, "r")
+            c = f.read()
+            f.close()
+
+            return c.split("\n")
+
+        def contains_skriptlin_export(file_contents: str, cmd: str) -> bool:
+            for line in file_contents:
+                if line.strip() == cmd:
+                    return True
+            return False
+
+        def copy_skriptlins_to_local_bin():
+            if os.path.exists(skriptlins_dst):
+                System.print(f"[setup] skipping copy_skriptlins_to_local_bin() as they are already there.")
+                return
+
+            System.run(f"cp -R {skriptlins_source} {skriptlins_dst}")
+            return
+
+        def __add_skriptlins_to_path():
+            PATH: list[str] = os.environ["PATH"]
+            CMD: str = f"echo export PATH=\$PATH:{skriptlins_dst} >> {bashrc_path}"
+            # Geez...
+            raw_cmd: str = " ".join(CMD.split()[1:3]).replace("\\", "")
+
+            if contains_skriptlin_export(read_file(bashrc_path), raw_cmd):
+                System.print(f"[setup] skipping add_skriptlins_to_path() as they are already there.")
+                return
+
+            print("DST: ", skriptlins_dst)
+
+            # Took me a second to figure out why the whole path was being piped
+            # to the .bashrc.
+            System.run(CMD)
+            return
 
 
-def ask_loop(prompt: str, valid_answers: list[str], default_answer: str) -> bool | str:
-    while True:
-        choice: bool = input(prompt).lower()
-        if choice == "": choice = default_answer
+        copy_skriptlins_to_local_bin()
+        __add_skriptlins_to_path()
+        return
 
-        if choice not in valid_answers:
-            err_msg = f"Please choose one of the following: {valid_answers}"
-            print(f"[error] {err_msg}")
-            continue
 
-        if choice == "y"  : return True
-        elif choice == "n": return False
-        elif choice == "" : return default_answer
-
-        return choice
-
-def run(cmd) -> None:
-    print(cmd)
-    os.system(cmd)
-    return None
-
-def error(msg) -> None:
-    print(msg)
-    exit(1)
-
-def ensure_super_user() -> None:
-    if is_super_user() is False:
-        err_msg = "This script must be ran as a super user. "\
-                  "Please run with either "                  \
-                  "`doas` or `sudo`."
-        error(err_msg)
-    return None
-
-def is_super_user() -> bool:
-    return int(os.getuid()) == 0
-
-def reboot():
-    os.system("reboot")
 
 def todo(msg):
     print(f"TODO: {msg}")
 
 if __name__ == "__main__":
+    #Configure.add_skriptlins_to_path()
     main()
-    #configuration_prompts()
-    config.debug()

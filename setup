@@ -18,8 +18,9 @@ from pprint import pprint
 
 global config
 
-RC_CONF = "/etc/rc.conf"
-FSTAB   = "/etc/fstab"
+RC_CONF     = "/etc/rc.conf"
+SYSCTL_CONF = "/etc/sysctl.conf"
+FSTAB       = "/etc/fstab"
 
 
 # The desired options
@@ -27,7 +28,7 @@ class Config:
     graphics_driver: str  = "intel"
     reduce_memory  : bool = False
     mount_proc     : bool = False
-    setup_xfat     : bool = False
+    enable_exfatfs : bool = False
     setup_ports    : bool = False
     linux_enable   : bool = False
     add_skriptlins_to_path     : bool = False
@@ -139,82 +140,6 @@ class Prompt:
 
             return choice
 
-class User:
-
-    @staticmethod
-    def ensure_super_user() -> None:
-        if User.is_super_user() is False:
-            err_msg = "This script must be ran as a super user. "\
-                      "Please run with either "                  \
-                      "`doas` or `sudo`."
-            System.error(err_msg)
-        return None
-
-    @staticmethod
-    def is_super_user() -> bool:
-        return int(os.getuid()) == 0
-
-    @staticmethod
-    def get_name() -> str:
-        return os.popen("users").read().strip()
-
-    @staticmethod
-    def get_home() -> str:
-        user: str = User.get_name()
-        return f"/home/{user}"
-
-
-flush = sys.stdout.flush
-
-# Code section to get/set/display system information/commands
-class System:
-    @staticmethod
-    def run(cmd) -> None:
-        print(cmd)
-        os.system(cmd)
-        return None
-
-    @staticmethod
-    def error(msg) -> None:
-        print(msg)
-        exit(1)
-
-    @staticmethod
-    def reboot():
-        os.system("reboot")
-
-    @staticmethod
-    def install_packages():
-        System.run(r"pkg install --dry-run --yes $(cat packages.txt | tr '\n' ' ')")
-
-    @staticmethod
-    def print(msg):
-        print(msg)
-        flush()
-
-    @staticmethod
-    def notify(stage: str, msg: str) -> None:
-        philter: dict[str, str] = {
-                "c": "configure",
-                "p": "prompt",
-                "t": "TODO"
-        }
-        assert stage in philter.keys()
-
-        expanded_stage: str = philter[stage]
-        System.print(f"[{expanded_stage}] {msg}")
-
-    @staticmethod
-    def read_file(path: str) -> list[str]:
-        f = open(path, "r")
-        c = f.read()
-        f.close()
-
-        return c.split("\n")
-
-    @staticmethod
-    def kdl_list_add(val: str) -> None:
-        System.run("sysrc kdl_load+={val}")
 
 # The code to actually configure the user's
 # desired options.
@@ -231,7 +156,7 @@ class Configure:
         if config.setup_ports            : Configure.setup_ports()
         if config.add_skriptlins_to_path : Configure.add_skriptlins_to_path()
 
-        todo("setup mount.xfat for mounting vfat usb sticks.")
+        todo("setup mount.exfat for mounting vfat usb sticks.")
         todo("enable automount.")
 
         todo("setup ports and install a port manager.")
@@ -262,7 +187,14 @@ class Configure:
     @staticmethod
     def reduce_memory() -> None: 
         global config
-        todo("configure freebsd to use less memory.")
+
+        vfs_maxbufspace: str = "vfs.maxbufspace"
+        msg = f"Skipping: Not reducing memory. '{vfs_maxbufspace}' is already configured."
+        if Conf.key_exists(SYSCTL_CONF, vfs_maxbufspace):
+            System.notify("c", msg)
+            return None
+
+        System.run("./skriptlins/tune-memory-wired")
         return None
 
     @staticmethod
@@ -278,9 +210,9 @@ class Configure:
         return None
 
     @staticmethod
-    def xfat() -> None:
+    def enable_exfatfs() -> None:
         global config
-        todo("configure xfat support.")
+        todo("configure exfat support.")
         return None
 
     @staticmethod
@@ -350,6 +282,14 @@ class Configure:
 
 class Conf:
     @staticmethod
+    def kld_module_exists(kld_module: str) -> bool:
+        kld_list: list[str] | None = Conf.get_value(RC_CONF, "kld_list")
+        if not kld_list:
+            return False
+
+        return kld_module in kld_list
+
+    @staticmethod
     def key_exists(conf_path: str, needle_key) -> bool:
         def fn(haystack_key: str):
             return needle_key == haystack_key
@@ -391,13 +331,90 @@ class Conf:
     def value_from(raw_string: str) -> list[str]:
         return [ value.replace("\"", "") for value in raw_string.split(" ") ]
 
+class User:
+
+    @staticmethod
+    def ensure_super_user() -> None:
+        if User.is_super_user() is False:
+            err_msg = "This script must be ran as a super user. "\
+                      "Please run with either "                  \
+                      "`doas` or `sudo`."
+            System.error(err_msg)
+        return None
+
+    @staticmethod
+    def is_super_user() -> bool:
+        return int(os.getuid()) == 0
+
+    @staticmethod
+    def get_name() -> str:
+        return os.popen("users").read().strip()
+
+    @staticmethod
+    def get_home() -> str:
+        user: str = User.get_name()
+        return f"/home/{user}"
+
+
+flush = sys.stdout.flush
+
+# Code section to get/set/display system information/commands
+class System:
+    @staticmethod
+    # TODO(tyler): Would be nice if this returned (exit_code, string)
+    def run(cmd) -> None:
+        print(cmd)
+        os.system(cmd)
+        return None
+
+    @staticmethod
+    def error(msg) -> None:
+        print(msg)
+        exit(1)
+
+    @staticmethod
+    def reboot():
+        os.system("reboot")
+
+    @staticmethod
+    def install_packages():
+        todo("enable pkg install <required-packages>")
+        System.print(r"pkg install --dry-run --yes $(cat packages.txt | tr '\n' ' ')")
+
+    @staticmethod
+    def print(msg):
+        print(msg)
+        flush()
+
+    @staticmethod
+    def notify(stage: str, msg: str) -> None:
+        philter: dict[str, str] = {
+                "c": "configure",
+                "p": "prompt",
+                "t": "TODO"
+        }
+        assert stage in philter.keys()
+
+        expanded_stage: str = philter[stage]
+        System.print(f"[{expanded_stage}] {msg}")
+
+    @staticmethod
+    def read_file(path: str) -> list[str]:
+        f = open(path, "r")
+        c = f.read()
+        f.close()
+
+        return c.split("\n")
+
+    @staticmethod
+    def kdl_list_add(val: str) -> None:
+        System.run("sysrc kdl_load+={val}")
+
 
 def todo(msg):
     System.notify("t", msg)
 
 if __name__ == "__main__":
-    #Configure.add_skriptlins_to_path()
-    Configure.mount_proc()
-    #print(Conf.get_value("/etc/rc.conf", "kld_list"))
+    #Configure.reduce_memory()
 
-    #main()
+    main()

@@ -19,6 +19,7 @@ from pprint import pprint
 global config
 
 RC_CONF = "/etc/rc.conf"
+FSTAB   = "/etc/fstab"
 
 
 # The desired options
@@ -266,8 +267,14 @@ class Configure:
 
     @staticmethod
     def mount_proc() -> None:
-        global config
-        todo("mount proc.")
+        line = "proc            /proc           procfs  rw      0       0"
+        cmd  = f"echo \"{line}\" >> {FSTAB}"
+
+        if Conf.contains_exact_line(FSTAB, line):
+            System.notify("c", f"Skipping: Not mounting proc. A proc entry already exists in '{FSTAB}'.")
+            return None
+
+        System.run(f"{cmd}")
         return None
 
     @staticmethod
@@ -390,6 +397,7 @@ def todo(msg):
 
 if __name__ == "__main__":
     #Configure.add_skriptlins_to_path()
+    Configure.mount_proc()
     #print(Conf.get_value("/etc/rc.conf", "kld_list"))
 
-    main()
+    #main()

@@ -127,7 +127,7 @@ class Prompt:
 
             if choice not in valid_answers:
                 err_msg = f"Please choose one of the following: {valid_answers}"
-                print(f"[error] {err_msg}")
+                System.notify("p", err_msg)
                 continue
 
             if choice == "y"  : return True
@@ -189,6 +189,18 @@ class System:
         print(msg)
         flush()
 
+    @staticmethod
+    def notify(stage: str, msg: str) -> None:
+        philter: dict[str, str] = {
+                "c": "configure",
+                "p": "prompt",
+                "t": "TODO"
+        }
+        assert stage in philter.keys()
+
+        expanded_stage: str = philter[stage]
+        System.print(f"[{expanded_stage}] {msg}")
+
 # The code to actually configure the user's
 # desired options.
 class Configure:
@@ -203,6 +215,7 @@ class Configure:
         if config.setup_ports            : Configure.setup_ports()
         if config.add_skriptlins_to_path : Configure.add_skriptlins_to_path()
 
+        System.notify("c", "Configuring the system based on user inputs.")
         todo("setup mount.xfat for mounting vfat usb sticks.")
         todo("enable automount.")
 
@@ -258,7 +271,7 @@ class Configure:
     def setup_ports() -> bool:
         ports_dir = "/usr/ports"
         if os.path.exists(ports_dir):
-            System.print(f"skipping 'setup_ports' as they are already installed.")
+            System.notify("c", f"skipping 'setup_ports' as they are already installed.")
             return False
 
         System.run("git clone https://git.freebsd.org/ports.git /usr/ports")
@@ -295,7 +308,7 @@ class Configure:
 
         def copy_skriptlins_to_local_bin():
             if os.path.exists(skriptlins_dst):
-                System.print(f"[setup] skipping copy_skriptlins_to_local_bin() as they are already there.")
+                System.notify("c", f"skipping copy_skriptlins_to_local_bin() as they are already there.")
                 return
 
             System.run(f"cp -R {skriptlins_source} {skriptlins_dst}")
@@ -308,10 +321,8 @@ class Configure:
             raw_cmd: str = " ".join(CMD.split()[1:3]).replace("\\", "")
 
             if contains_skriptlin_export(read_file(bashrc_path), raw_cmd):
-                System.print(f"[setup] skipping add_skriptlins_to_path() as they are already there.")
+                System.notify("c", f"skipping add_skriptlins_to_path() as they are already there.")
                 return
-
-            print("DST: ", skriptlins_dst)
 
             # Took me a second to figure out why the whole path was being piped
             # to the .bashrc.
@@ -326,7 +337,7 @@ class Configure:
 
 
 def todo(msg):
-    print(f"TODO: {msg}")
+    System.notify("t", msg)
 
 if __name__ == "__main__":
     #Configure.add_skriptlins_to_path()

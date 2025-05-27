@@ -25,9 +25,6 @@ import os
 #    If you connected your monitor via an HDMI cable, then you'd be looking for
 #    an entry like "HDMI-1". Other common cable types: "LVDS", "VGA", "DP".
 
-os.system(xrandr --listmonitors)
-
-
 # ------- START CONFIGURATION
 LAPTOP_SCREEN="LVDS-1"
 PRIMARY_MONITOR="VGA-1"
@@ -68,5 +65,8 @@ cmd = f"xrandr {LAPTOP_SCREEN_CONFIG} "     \
 	       "--output DP-2   --off "     \
 	       "--output DP-3   --off "
 
+os.popen(cmd)
+
+# Having this print out is useful as we can then cat it to some other file to
+# make the change persist across reboots.
 print(cmd)
-print(os.popen(cmd))

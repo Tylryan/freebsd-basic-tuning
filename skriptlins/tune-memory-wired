@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # USAGE
-# 	./this-script
+# 	doas ./this-script
 #
 # DESCRIPTION
 # 	Set the maximum allowed buffer space to 5MB. This 
@@ -17,4 +17,6 @@ MB=$((KB*KB))
 
 res=$((5 * MB))
 
-echo "vfs.maxbufspace=${res}" >> /etc/sysctl.conf
+#echo "vfs.maxbufspace=${res}" >> /etc/sysctl.conf
+sysctl vfs.maxbufspace=${res}"
+

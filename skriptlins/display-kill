@@ -1,0 +1,23 @@
+#!/bin/sh
+
+# USAGE
+# 	./this-script screen-name
+#
+# DESCRIPTION
+#	Kills a given display. You can find out which displays are active and
+# 	... to be killed by running `xrandr --listactivemonitors`.
+#	
+#	The "screen-name" format can one of the following strings followed by
+#	an integer:
+#	- "LVDS-"
+#	- "VGA-"
+#	- "HDMI-"
+#	- "DP-"
+#	
+#	So if you are trying to connect to your monitor with an HDMI cable, then
+#	your screen name might be "HDMI-1". Verify this by running
+#	`xrandr --listmonitors`. Make sure the monitor is plugged in!
+#
+
+
+xrandr --output $1 --off

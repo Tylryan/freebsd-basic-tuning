@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# USAGE
+#	doas ./this-script
+#
+# DESCRIPTION
+#	Downloads the Ports Collection at /usr/ports.
+# NOTES
+# - Requires `git`.
+
+git clone https://git.freebsd.org/ports.git /usr/ports

@@ -1,0 +1,88 @@
+#!/usr/local/bin/python3.11
+
+import os
+
+# USAGE
+# 	./this-script
+#
+# DESCRIPTION
+#   This script will apply this config to your computer as well as store
+#   save it in '~/.screenlayout/default.sh' in order for it to persist
+#   after rebooting.
+
+# NOTES
+# - I used `arandr` to provide this config and you probably should too.
+# - I only used Python here so I could have format the strings in without too
+#   much clutter.
+#
+# COMMON ISSUES
+# - You will most definitely need to change the SHBANG path at the top to
+#   point to your own Python binary
+#
+
+# TIPS
+# 1. Make sure you have the monitors you want configured, connected.
+# 2. Run `xrandr --listmonitors` to show you which monitors you can connect.
+#    If you connected your monitor via an HDMI cable, then you'd be looking for
+#    an entry like "HDMI-1". Other common cable types: "LVDS", "VGA", "DP".
+
+# ------- START CONFIGURATION
+LAPTOP_SCREEN  ="LVDS-1"
+PRIMARY_MONITOR="VGA-1"
+
+LAPTOP_SCREEN_DIMENSIONS  = "1600x900"
+PRIMARY_MONITOR_DIMENSIONS = "1920x1080"
+
+LAPTOP_POS 	    = f"{LAPTOP_SCREEN_DIMENSIONS.split('x')[0]}x0"
+PRIMARY_MONITOR_POS = "0x0"
+
+# This is where your xrandr configuration will be stored.
+HOME_DIR          = "/home/" + os.popen("users").read().strip()
+SCREEN_LAYOUT_DIR = f"{HOME_DIR}/.screenlayout"
+CONFIG_PATH       = f"{SCREEN_LAYOUT_DIR}/default.sh"
+
+# ------- END CONFIGURATION
+
+
+
+# NOTE: Pay close attention to the EXTRA SPACES after each option below.
+LAPTOP_SCREEN_CONFIG=f"--output {LAPTOP_SCREEN}   " \
+	      f"--mode {LAPTOP_SCREEN_DIMENSIONS} " \
+	      f"--pos {LAPTOP_POS} "                \
+	      "--rotate normal "
+
+
+# NOTE: '--right-of $SCREEN' would put this screen to the right of another screen.
+PRIMARY_MONITOR_RELATIVE_POSITION=f"--left-of {LAPTOP_SCREEN} "
+
+PRIMARY_MONITOR_CONFIG=f"--output {PRIMARY_MONITOR} "          \
+		       "--primary " 		               \
+		       f"--mode {PRIMARY_MONITOR_DIMENSIONS} " \
+		       f"--pos {PRIMARY_MONITOR_POS} " 	       \
+		       "--rotate normal " 	               \
+		       f"{PRIMARY_MONITOR_RELATIVE_POSITION}"
+
+cmd = f"xrandr {LAPTOP_SCREEN_CONFIG} "     \
+	       f"{PRIMARY_MONITOR_CONFIG} " \
+	       "--output HDMI-1 --off "     \
+	       "--output DP-1   --off "     \
+	       "--output HDMI-2 --off "     \
+	       "--output HDMI-3 --off "     \
+	       "--output DP-2   --off "     \
+	       "--output DP-3   --off "
+
+def write_file(file_path: str, string: str) -> None:
+    f = open(file_path, "x")
+    f.write(string)
+    f.close()
+
+# Having this print out is useful as we can then cat it to some other file to
+# make the change persist across reboots.
+print(cmd)
+os.popen(cmd)
+
+
+if os.path.isdir(SCREEN_LAYOUT_DIR) is False:
+    os.mkdir(SCREEN_LAYOUT_DIR)
+
+write_file(CONFIG_PATH, cmd)

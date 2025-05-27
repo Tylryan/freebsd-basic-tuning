@@ -1,0 +1,16 @@
+#!/bin/sh
+
+
+# USAGE
+# 	./this-script
+#
+# DESCRIPTION
+# The user will setup their displays using a GUI and the output will be saved
+# to a temporary file which will be used to append to an RC file.
+#
+# NOTE
+# 	Make sure to save your settings in a file called ~/.screenlayout/default.sh
+#
+
+echo "MAKE SURE YOU SAVE YOUR SETTINGS IN ~/.screenlayout/<settings-name>.sh in order to get it to execute after you login!"
+arandr

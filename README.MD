@@ -28,7 +28,7 @@ setup a minimal personal computing system.
 2) `Python3` as an executable. 
 	- By default, FreeBSD creates a binary called Python3.XX. 
 	  You'll need to run the following command:
-   	  `ln -s /usr/local/bin/python3.11 /usr/local/bin/python3`
+   	  `alias python='usr/local/bin/<your-python-version>`
 
 > If you would like to add more packages for the script to install,
 > add them to the `extra-packages.txt` file.
@@ -44,3 +44,7 @@ For example:
 - `wifi-setup`      : to setup a new wifi connection.
 - `set-audio-output`: changes the current audio output (from speaker
   to headphones for example)
+
+## Packages
+Add or subtracks packages you would like to have automatically installed
+in the `freebsd.packages` file.

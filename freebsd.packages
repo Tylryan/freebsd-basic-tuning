@@ -1,0 +1,18 @@
+minimal_packages = (
+	"doas"          ,
+	"en-freebsd-doc",
+	"git"           ,
+	"i3"            ,
+	"i3lock-color"  ,
+	"i3status"      ,
+	"pkg"           ,
+	"portconfig"    ,
+	"pulseaudio"    ,
+	"python311"     ,
+	"rofi"          ,
+	"xorg"          ,
+	"xorg-server"   ,
+)
+
+
+extra_packages = ()

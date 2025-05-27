@@ -17,6 +17,7 @@ from pprint import pprint
 
 global config
 
+PACKAGE_FILE="freebsd.packages"
 RC_CONF     = "/etc/rc.conf"
 SYSCTL_CONF = "/etc/sysctl.conf"
 FSTAB       = "/etc/fstab"
@@ -430,8 +431,19 @@ class System:
 
     @staticmethod
     def install_packages():
-        todo("enable pkg install <required-packages>")
-        System.print(r"pkg install --dry-run --yes $(cat packages.txt | tr '\n' ' ')")
+        # This values are sort of magic. Look at the very bottom of this file
+        # for an `exec()` line. That's where these are comming from.
+        assert os.path.exists("freebsd.packages")
+        assert minimal_packages is not None
+        assert extra_packages is not None
+
+        minimal_pkgs = " ".join(list(minimal_packages))
+        extra_pkgs  = " ".join(list(extra_packages))
+
+        cmd = f"pkg install --dry-run --yes {minimal_pkgs} {extra_pkgs}"
+        System.run(cmd)
+        return None
+
 
     @staticmethod
     def print(msg):
@@ -450,13 +462,18 @@ class System:
         expanded_stage: str = philter[stage]
         System.print(f"[{expanded_stage}] {msg}")
 
+    
     @staticmethod
-    def read_file(path: str) -> list[str]:
-        f = open(path, "r")
+    def read_file_to_string(path: str) -> str:
+        f = open(path)
         c = f.read()
         f.close()
 
-        return c.split("\n")
+        return c
+
+    @staticmethod
+    def read_file(path: str) -> list[str]:
+        return System.read_file_to_string(path).split("\n")
 
     @staticmethod
     def kdl_list_add(val: str) -> None:
@@ -480,4 +497,6 @@ def todo(msg):
 
 
 if __name__ == "__main__":
+    # Magic [TODO(explain)]
+    exec(System.read_file_to_string(PACKAGE_FILE))
     main()

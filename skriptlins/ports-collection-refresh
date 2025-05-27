@@ -1,0 +1,11 @@
+#!/bin/sh
+
+
+# USAGE
+#	doas ./this-script
+#
+# DESCRIPTION
+#	Refreshes your Ports Collection. This does update the installed packages
+#	you have on your system.
+
+cd /usr/ports && git pull

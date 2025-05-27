@@ -1,0 +1,72 @@
+#!/usr/local/bin/python3.11
+
+import os
+
+# USAGE
+# 	./this-script
+#
+# DESCRIPTION
+# 	My setup has only a laptop monitory, and an external monitory (VGA-1).
+# 	This `xrandr` configuration will set my exteranl monitor as the primary
+# 	montor (--primary) This string was autocreated using `arandr` and is 
+# 	custom to my needs.
+# NOTES
+# - I used `arandr` to provide this config and you probably should too.
+# - I only used Python here so I could have format the strings in without too
+#   much clutter.
+#
+# COMMON ISSUES
+# - You will most definitely need to change the SHBANG path at the top to
+#   point to your own Python binary
+#
+
+# 1. Make sure you have the monitors you want configured, connected.
+# 2. Run `xrandr --listmonitors` to show you which monitors you can connect.
+#    If you connected your monitor via an HDMI cable, then you'd be looking for
+#    an entry like "HDMI-1". Other common cable types: "LVDS", "VGA", "DP".
+
+os.system(xrandr --listmonitors)
+
+
+# ------- START CONFIGURATION
+LAPTOP_SCREEN="LVDS-1"
+PRIMARY_MONITOR="VGA-1"
+
+LAPTOP_SCREEN_DIMENSIONS  = "1600x900"
+PRIMARY_MONITOR_DIMENSIONS = "1920x1080"
+
+LAPTOP_POS 	    = f"{LAPTOP_SCREEN_DIMENSIONS.split('x')[0]}x0"
+PRIMARY_MONITOR_POS = "0x0"
+
+# ------- END CONFIGURATION
+
+
+
+# NOTE: Pay close attention to the EXTRA SPACES after each option below.
+LAPTOP_SCREEN_CONFIG=f"--output {LAPTOP_SCREEN}   " \
+	      f"--mode {LAPTOP_SCREEN_DIMENSIONS} " \
+	      f"--pos {LAPTOP_POS} "                \
+	      "--rotate normal "
+
+
+# NOTE: '--right-of $SCREEN' would put this screen to the right of another screen.
+PRIMARY_MONITOR_RELATIVE_POSITION=f"--left-of {LAPTOP_SCREEN} "
+
+PRIMARY_MONITOR_CONFIG=f"--output {PRIMARY_MONITOR} "          \
+		       "--primary " 		               \
+		       f"--mode {PRIMARY_MONITOR_DIMENSIONS} " \
+		       f"--pos {PRIMARY_MONITOR_POS} " 	       \
+		       "--rotate normal " 	               \
+		       f"{PRIMARY_MONITOR_RELATIVE_POSITION}"
+
+cmd = f"xrandr {LAPTOP_SCREEN_CONFIG} "     \
+	       f"{PRIMARY_MONITOR_CONFIG} " \
+	       "--output HDMI-1 --off "     \
+	       "--output DP-1   --off "     \
+	       "--output HDMI-2 --off "     \
+	       "--output HDMI-3 --off "     \
+	       "--output DP-2   --off "     \
+	       "--output DP-3   --off "
+
+print(cmd)
+print(os.popen(cmd))

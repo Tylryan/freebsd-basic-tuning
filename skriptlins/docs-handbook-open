@@ -1,0 +1,17 @@
+#!/bin/sh
+
+
+# USAGE
+#	./this-script
+#
+# DESCRIPTION
+#	Opens the FreeBSD handbook.
+#
+
+LANGUAGE_CODE="en"
+HANDBOOK_PATH=/usr/local/share/doc/freebsd/en/books/handbook/book/index.html
+
+# Use this option if you'd rather view it in your favorite PDF viewer.
+#HANDBOOK_PATH=/usr/local/share/doc/freebsd/en/books/handbook/handbook_en.pdf
+
+xdg-open $HANDBOOK_PATH

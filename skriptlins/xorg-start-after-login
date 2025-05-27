@@ -1,0 +1,11 @@
+
+
+# USAGE
+#	./this-script
+#
+# DESCRIPTION
+#	Will automatically start Xorg after the user logs in via the tty.
+#
+
+
+

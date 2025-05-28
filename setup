@@ -10,7 +10,9 @@
 # 
 # Currently runs on just 400 MB of ram. Compare to the original value of 6.5 GB 
 # of ram "wasted" on Wired Memory.
+# 
 
+import asyncio
 import os
 import sys
 from pprint import pprint
@@ -26,33 +28,36 @@ FSTAB       = "/etc/fstab"
 class Config:
     graphics_driver: str  = "intel"
     reduce_memory  : bool = False
-    mount_proc     : bool = False
     enable_exfatfs : bool = False
-    setup_ports    : bool = False
     linux_enable   : bool = False
+    mount_proc     : bool = False
+    setup_ports    : bool = False
+    doas           : bool = False
     add_skriptlins_to_path     : bool = False
+    
+    # Requires GUI
+    external_monitor: bool = False
+
+
 
     def debug(self):
         pprint(self.__dict__)
 
 config = Config()
 def main():
-    User.ensure_super_user()
-    todo("check if user has internet. If not, set it up for them.")
-
-    Prompt.run()
-    System.install_packages()
-    Configure.run()
-
-
-
-    System.reboot()
-
+    if User.is_super_user():
+        Prompt.system_config()
+        System.install_packages()
+        Configure.system()
+        System.reboot()
+    else:
+        Prompt.i3()
+        Configure.i3()
 
 class Prompt:
 
     @staticmethod
-    def run() -> None:
+    def system_config() -> None:
         global config
 
         config.graphics_driver = Prompt.graphics_driver()
@@ -61,9 +66,29 @@ class Prompt:
         config.setup_ports     = Prompt.setup_ports()
         config.linux_enable    = Prompt.linux_enable()
         config.add_skriptlins_to_path = Prompt.add_skriptlins_to_path()
+
         todo("ask user if they would like to enable automount.")
 
         print()
+
+    @staticmethod
+    def i3() -> None:
+        global config
+        
+        config.external_monitor= Prompt.external_monitor()
+        
+        return None
+            
+
+    @staticmethod
+    def external_monitor() -> bool:
+        regex = '"HDMI|DP|VGA"'
+        monitors = int(System.run(f"xrandr --listactivemonitors | grep -E {regex} | wc -l").strip())
+        if monitors == 0:
+            return False
+
+        prompt = "Would you like to setup your external monitors?"
+        return Prompt.yes_no_loop(prompt)
 
     @staticmethod
     def add_skriptlins_to_path():
@@ -119,9 +144,11 @@ class Prompt:
             if choice == "": choice = default_answer
 
             if choice not in valid_answers:
+                print(f"Invalid Choice: {choice}.")
                 err_msg = f"Please choose one of the following: {valid_answers}."
                 System.notify("p", err_msg)
                 continue
+
 
             if choice == "y"  : return True
             elif choice == "n": return False
@@ -135,7 +162,7 @@ class Prompt:
 class Configure:
 
     @staticmethod
-    def run() -> None:
+    def system() -> None:
         global config
         System.notify("c", "Configuring the system based on user inputs.")
 
@@ -144,6 +171,10 @@ class Configure:
         if config.mount_proc             : Configure.mount_proc()
         if config.setup_ports            : Configure.setup_ports()
         if config.add_skriptlins_to_path : Configure.add_skriptlins_to_path()
+
+        Configure.start_x_after_login()
+        Configure.xinitrc()
+
 
         todo("setup mount.exfat for mounting vfat usb sticks.")
         todo("enable automount.")
@@ -156,13 +187,97 @@ class Configure:
         # To be able to watch youtube videos for example.
         todo("enable pulseaudio.")
 
-        Configure.start_x_after_login()
-        Configure.xinitrc()
             
 
 
         return None
 
+    @staticmethod
+    def i3() -> None:
+        System.print("Configuring i3")
+        if config.external_monitor       : Configure.external_monitor()
+
+    @staticmethod
+    def external_monitor() -> None:
+        # We've already asked them if they want to set this up.
+        
+        # Display active monitors
+        # monitors: list[str]= Ask which on they would like to select (need function to get)
+        # monitors = list(map(remove_junk_chars, res))
+        
+        output: str = System.run("xrandr --listactivemonitors")
+        System.print(output)
+        
+        monitors: list[str] = [ 
+            # Just the VGA-1 etc. The .lower()
+            # is required by the choice_loop.
+            x.split(" ")[-1].strip().lower()
+            # For every line after the first.
+            for x in output.strip().split("\n")[1:]
+        ]
+
+        box: str = f"[{'|'.join(monitors)}]"
+        monitor_choice: str = Prompt.choice_loop(
+            "Which monitor would you like to enable?",
+            box,
+            monitors,
+            monitors[0]
+        ).upper()
+        System.print(f"You Chose: {monitor_choice}")
+        
+        
+        # TODO(tyler): I could have it do the prompt loop where the predicate is whether or not the
+        # input string follows the correct regex.
+        laptop_dimensions: str = System.input("Laptop screen dimensions? E.g. 1600x900")
+        monitor_dimensions: str = System.input("Monitor dimensions? E.g 1920x1080")
+        
+        valid_answers = ["left", "right", ""]
+        relative_position: str = Prompt.choice_loop(
+            "Monitor relative position?", 
+            "[LEFT|right]",
+            valid_answers,
+            default = valid_answers[0]
+        )
+        
+        laptop_settings =f"--output LVDS-1 "             \
+                         f"--mode {laptop_dimensions} "  \
+                         f"--pos 1600x0 "                \
+                         "--rotate normal "
+                         
+        monitor_settings =f"--output {monitor_choice} "                  \
+                               "--primary "                            \
+                               f"--mode  {monitor_dimensions}"         \
+                               f"--pos 0x0 "                           \
+                               "--rotate normal "                      \
+                               f"{relative_position}"
+        
+        
+        cmd = f"xrandr {laptop_settings} "     \
+              f"{monitor_settings} "
+              #"--output HDMI-1 --off "     \
+              #"--output DP-1   --off "     \
+              #"--output HDMI-2 --off "     \
+              #"--output HDMI-3 --off "     \
+              #"--output DP-2   --off "     \
+              #"--output DP-3   --off "
+
+        screenlayout_dir = User.get_home() + "/.screenlayout"
+        screenlayout_path = f"{screenlayout_dir}/default.sh"
+        if os.path.isdir(screenlayout_dir) is False:
+            os.mkdir(screenlayout_dir)
+            System.notify("c", f"Created directory for xrandr config: '{screen_layout_dir}'")
+        if os.path.isfile(screenlayout_path):
+            overwrite: str = Prompt.yes_no_loop(
+                "Looks like there is already a xrandr config on this machine. Would you like to overwrite it?",
+                default = "y"
+            )
+            if overwrite:
+                System.print(f"Overwriting {screenlayout_path}.")
+                System.file_append(screenlayout_path, cmd)
+            else:
+                System.print(f"Skipping: Not overwriting '{screenlayout_path}'.")
+        
+        return None
     
     @staticmethod
     def graphics_driver() -> None:
@@ -317,6 +432,13 @@ class Configure:
         Conf.append_line(xinitrc_personal, pulse_audio)
         Conf.append_line(xinitrc_personal, swap_caps_with_escape)
         Conf.append_line(xinitrc_personal, exec_i3)
+        
+        # Copy the xinitrc we have stashed away in snippets to the
+        # global xinitrc.
+        # This effectively just removes TMW from the picture.
+        global_xinitrc = "/usr/local/etc/X11/xinit/xinitrc"
+        System.run(f"rm {global_xinitrc}")
+        System.run(f"ln {User.get_home()}/.xinitrc {global_xinitrc}")
 
         return None
 
@@ -386,12 +508,7 @@ class User:
 
     @staticmethod
     def ensure_super_user() -> None:
-        if User.is_super_user() is False:
-            err_msg = "This script must be ran as a super user. "\
-                      "Please run with either "                  \
-                      "`doas` or `sudo`."
-            System.error(err_msg)
-        return None
+        return User.is_super_user()
 
     @staticmethod
     def is_super_user() -> bool:
@@ -413,10 +530,19 @@ flush = sys.stdout.flush
 class System:
     @staticmethod
     # TODO(tyler): Would be nice if this returned (exit_code, string)
-    def run(cmd) -> None:
+    def run(cmd) -> str:
         print(cmd)
-        os.system(cmd)
-        return None
+        return os.popen(cmd).read()
+
+    async def runa(cmd) -> str:
+        proc = await asyncio.create_subprocess_shell(
+            cmd,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+        
+        stdout, stderr = await proc.communicate()
+        return stdout
 
     @staticmethod
     def error(msg) -> None:
@@ -461,6 +587,10 @@ class System:
 
         expanded_stage: str = philter[stage]
         System.print(f"[{expanded_stage}] {msg}")
+        
+    @staticmethod
+    def input(prompt: str) -> object:
+        return input(f"[INPUT]: {prompt}: ")
 
     
     @staticmethod

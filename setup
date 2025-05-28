@@ -195,6 +195,9 @@ class Configure:
     @staticmethod
     def i3() -> None:
         System.print("Configuring i3")
+        
+        System.copy_i3_config()
+
         if config.external_monitor       : Configure.external_monitor()
 
     @staticmethod
@@ -272,10 +275,10 @@ class Configure:
                 default = "y"
             )
             if overwrite:
-                System.print(f"Overwriting {screenlayout_path}.")
+                System.notify("c", f"Overwriting {screenlayout_path}.")
                 System.file_append(screenlayout_path, cmd)
             else:
-                System.print(f"Skipping: Not overwriting '{screenlayout_path}'.")
+                System.notify(f"c", "Skipping: Not overwriting '{screenlayout_path}'.")
         
         return None
     
@@ -621,6 +624,16 @@ class System:
 
         return None
     
+
+    @staticmethod
+    def copy_i3_config() -> None:
+        i3_conf_dir  = f"{User.get_home()}/.config/i3"
+        i3_conf_path = f"{i3_conf_dir}/config"
+        if os.path.isdir(i3_conf_dir) is False:
+            System.run(f"mkdir {i3_conf_dir}")
+
+        System.run(f"cp ./snippets/config-i3 {i3_conf_path}")
+        return None
 
 def todo(msg):
     System.notify("t", msg)

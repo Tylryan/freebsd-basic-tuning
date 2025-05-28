@@ -1,10 +1,17 @@
 #!/bin/sh
 
 # USAGE
-# 	doas ./this-script
+# 	doas ./this-script kernel-module
 #
 # DESCRIPTION
 # 	Appends a kernel module to 'kld_list' in the /etc/rc.conf.
+#
+#
+# NOTES
+# 	- If the kernel module is already in 'kld_list', then the entry will
+# 	  not be added as per `sysrc`. So if you happen to be writing a script
+# 	  that adds a kernel module to 'kld_list', you don't already have to check
+# 	  if it's there.
 #
 # EXAMPLE
 #	Suppose our computer uses an intel graphics card. We would want make 

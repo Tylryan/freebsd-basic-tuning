@@ -1,0 +1,56 @@
+#!/usr/local/bin/bash
+
+# USAGE
+# 	$ source ./_this-script 
+# 	$ this-script [ greet | speak [ loutdly | softly ] | grunt ]
+#
+# DESCRIPTION
+# 	A simple example of how to write bash-completion scripts.
+#
+# EXAMPLES
+# First source `_this-script` with `source ./_this-script`. Then run
+# `this-script` and hit tab twice to see the suggestions.
+# 	$ this-script [TABTAB]
+# 	$ this-script greet [TABTAB]
+# 	$ this-script speak loudly [TABTAB]
+
+_dude()
+{
+	local cur prev opts cword
+	COMPREPLY=()
+	cur="${COMP_WORDS[COMP_CWORD]}"
+	prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+
+	# dude [ greet | speak [ loudly | softly ] | grunt ]
+	case $prev in
+		# If the previous argument was the name of our program and
+		# the user is requesting suggestions, then return the following
+		# three next commands they can run.
+		dude)
+			# Your program could have an function called:
+			# cmd_dude_next(cur) which would spit out a filtered 
+			# list of these three options.
+			suggestions=$(compgen -W "greet speak grunt")
+			COMPREPLY=( $suggestions )
+			;;
+		speak)
+			suggestions=$(compgen -W "loudly softly") 
+			COMPREPLY=( $suggestions )
+			;;
+			
+		# If it's any other command, then just print out the files in
+		# the current directory.
+		*)
+
+			COMPREPLY+=( $(ls) )
+			;;
+
+	esac
+}
+
+
+# F: Function
+# C: Command
+	    # F    C
+complete -F _dude dude

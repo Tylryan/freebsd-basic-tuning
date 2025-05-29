@@ -1,0 +1,17 @@
+#!/usr/local/bin/bash
+
+_audio-volume-set()
+{
+	local cur prev opts cword
+	COMPREPLY=()
+	cur="${COMP_WORDS[COMP_CWORD]}"
+	prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+
+	# When the user presses the tab key twice, always suggest the following
+	# options.
+	suggestions=$(compgen -W "0% 50% 100%")
+	COMPREPLY+=( $suggestions )
+}
+
+complete -F _audio-volume-set audio-volume-set

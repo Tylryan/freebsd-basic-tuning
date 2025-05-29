@@ -61,9 +61,10 @@ in the `freebsd.packages` file.
 ## BEFORE YOU CONFIGURE /boot/loader.conf
 Before you add a kernel module in your loader.conf file, ask 2 questions:
 1. Is the module already loaded (i.e., is the module built into the kernel you're
-   using?): `kldstat` | grep <your-module/driver>. This will reduce the amount
+   using?): `kldstat | grep <your-module/driver>`. This will reduce the amount
    of time throwing tomatoes at the wall.
 2. Does it need to be loaded that early? or Can it wait until `sysrc.conf` is
-   loaded? If the answer to this question is yes, then you can just add it to
-   your `sysrc.conf` file with `sysrc kld_list+="<your-kernel-module>"`.
+   loaded? If the answer to these questions are no/yes respectively, then you 
+   can just add it to your `sysrc.conf` file with 
+   `sysrc kld_list+="<your-kernel-module>"`.
 

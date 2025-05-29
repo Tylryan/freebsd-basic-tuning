@@ -30,6 +30,11 @@ extra_packages = (
 	"vscode"           ,
 
 	# ----- Admin Tools
+	# TODO(tyler): Remove this when you've coded it.
+	# BASH-COMPLETION requires you to have this in your .bashrc file:
+	# [[ $PS1 && -f /usr/local/share/bash-completion/bash_completion.sh ]] && \
+	# source /usr/local/share/bash-completion/bash_completion.sh
+	"bash-completion"  , # Autocomplete/suggest commands
 	"hw-probe"         , # Provides a ton of info about your hardware.
 	"sudo"             , # Alternative to `doas`.
 	"htop"             , # Alternative to `top`.

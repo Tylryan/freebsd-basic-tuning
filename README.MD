@@ -51,14 +51,14 @@ in the `freebsd.packages` file.
 
 ---
 
-# NOTES
+# Notes
 - `pciconf` for INTERNAL hardware on your computer that could connect to a via 
    USB, ETHER, WIFI, ETC.
 - `usbconfig` for EXTERNAL hardware that could be connected to your computer via 
    USB, IDK, ETC.
 
 
-## BEFORE YOU CONFIGURE /boot/loader.conf
+## Before You Configure `/boot/loader.conf`
 Before you add a kernel module in your loader.conf file, ask 2 questions:
 1. Is the module already loaded (i.e., is the module built into the kernel you're
    using?): `kldstat | grep <your-module/driver>`. This will reduce the amount
@@ -68,3 +68,8 @@ Before you add a kernel module in your loader.conf file, ask 2 questions:
    can just add it to your `sysrc.conf` file with 
    `sysrc kld_list+="<your-kernel-module>"`.
 
+## Kernel Modification
+### The "MINIMAL" Kernel
+**FILE**: `/usr/src/sys/amd64/conf/MINIMAL`  
+As per the comment in the header, "Minimal" is defined as "GENERIC, minus all 
+functionality that can be replaced by loading kernel" 

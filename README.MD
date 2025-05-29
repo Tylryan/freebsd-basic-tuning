@@ -48,3 +48,22 @@ For example:
 ## Packages
 Add or subtracks packages you would like to have automatically installed
 in the `freebsd.packages` file.
+
+---
+
+# NOTES
+- `pciconf` for INTERNAL hardware on your computer that could connect to a via 
+   USB, ETHER, WIFI, ETC.
+- `usbconfig` for EXTERNAL hardware that could be connected to your computer via 
+   USB, IDK, ETC.
+
+
+## BEFORE YOU CONFIGURE /boot/loader.conf
+Before you add a kernel module in your loader.conf file, ask 2 questions:
+1. Is the module already loaded (i.e., is the module built into the kernel you're
+   using?): `kldstat` | grep <your-module/driver>. This will reduce the amount
+   of time throwing tomatoes at the wall.
+2. Does it need to be loaded that early? or Can it wait until `sysrc.conf` is
+   loaded? If the answer to this question is yes, then you can just add it to
+   your `sysrc.conf` file with `sysrc kld_list+="<your-kernel-module>"`.
+

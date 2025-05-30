@@ -192,23 +192,110 @@ class Configure:
 
         return None
 
+
+
+    @staticmethod
+    def doas() -> None:
+        """ROOT"""
+        System.system("echo permit :wheel >> /usr/local/etc/doas.conf")
+
+    
+    @staticmethod
+    def graphics_driver() -> None:
+        """ROOT"""
+        global config
+        INTEL_MODULE: str = "i915kms"
+
+        graphics_driver = config.graphics_driver
+        System.notify("c", f"Configuring video driver for '{graphics_driver}'.")
+
+        
+        value: list[str] | None = Conf.get_value(RC_CONF, "kld_list")
+
+        msg = f"Skipping: Not enabling '{INTEL_MODULE}' kernel module: 'load_list+=\"{INTEL_MODULE}\"' already in '/etc/rc.conf'."
+        if value:
+            System.notify("c", msg)
+            return
+
+        System.system(f"pkg install drm-kmod")
+        System.system(f"kldload {INTEL_MODULE}")
+        System.kdl_list_add(INTEL_MODULE)
+        return None
+
+    @staticmethod
+    def reduce_memory() -> None: 
+        """ROOT"""
+        global config
+
+        vfs_maxbufspace: str = "vfs.maxbufspace"
+        msg = f"Skipping: Not reducing memory. '{vfs_maxbufspace}' is already configured."
+        if Conf.key_exists(SYSCTL_CONF, vfs_maxbufspace):
+            System.notify("c", msg)
+            return None
+
+        System.run("./skriptlins/tune-memory-wired")
+        return None
+
+    @staticmethod
+    def mount_proc() -> None:
+        """ROOT"""
+        line = "proc            /proc           procfs  rw      0       0"
+        cmd  = f"echo \"{line}\" >> {FSTAB}"
+
+        if Conf.contains_exact_line(FSTAB, line):
+            System.notify("c", f"Skipping: Not mounting proc. A proc entry already exists in '{FSTAB}'.")
+            return None
+
+        System.run(f"{cmd}")
+        return None
+
+    @staticmethod
+    def enable_exfatfs() -> None:
+        """ROOT"""
+        global config
+        todo("configure exfat support.")
+        return None
+
+    @staticmethod
+    def linux_compatability():
+        """ROOT"""
+        global config
+        todo("configure linux compatability.")
+        return None
+
+    @staticmethod
+    def setup_ports() -> bool:
+        """ROOT"""
+
+        ports_dir = "/usr/ports"
+        if os.path.exists(ports_dir):
+            System.notify("c", f"Skipping: Not setting up ports. Directory already exists: '{ports_dir}'.")
+            return False
+
+        System.run("git clone https://git.freebsd.org/ports.git /usr/ports")
+        todo("install a port manager.")
+        return True
+
     @staticmethod
     def i3() -> None:
+        """NO ROOT"""
         System.print("Configuring i3")
         
+        # Copy config over
         System.copy_i3_config()
+        # startx in .profile
+        Configure.start_x_after_login()
+        # setup .xinitrc
+        Configure.xinitrc()
+
+        System.system("startx")
 
         if config.external_monitor       : Configure.external_monitor()
 
 
     @staticmethod
-    def doas() -> None:
-        """Requires ROOT"""
-        System.system("echo permit :wheel >> /usr/local/etc/doas.conf")
-
-
-    @staticmethod
     def external_monitor() -> None:
+        """NO ROOT"""
         # We've already asked them if they want to set this up.
         
         # Display active monitors
@@ -288,79 +375,10 @@ class Configure:
                 System.notify(f"c", "Skipping: Not overwriting '{screenlayout_path}'.")
         
         return None
-    
-    @staticmethod
-    def graphics_driver() -> None:
-        global config
-        INTEL_MODULE: str = "i915kms"
-
-        graphics_driver = config.graphics_driver
-        System.notify("c", f"Configuring video driver for '{graphics_driver}'.")
-
-        
-        value: list[str] | None = Conf.get_value(RC_CONF, "kld_list")
-
-        msg = f"Skipping: Not enabling '{INTEL_MODULE}' kernel module: 'load_list+=\"{INTEL_MODULE}\"' already in '/etc/rc.conf'."
-        if value:
-            System.notify("c", msg)
-            return
-
-        System.system(f"pkg install drm-kmod")
-        System.system(f"kldload {INTEL_MODULE}")
-        System.kdl_list_add(INTEL_MODULE)
-        return None
-
-    @staticmethod
-    def reduce_memory() -> None: 
-        global config
-
-        vfs_maxbufspace: str = "vfs.maxbufspace"
-        msg = f"Skipping: Not reducing memory. '{vfs_maxbufspace}' is already configured."
-        if Conf.key_exists(SYSCTL_CONF, vfs_maxbufspace):
-            System.notify("c", msg)
-            return None
-
-        System.run("./skriptlins/tune-memory-wired")
-        return None
-
-    @staticmethod
-    def mount_proc() -> None:
-        line = "proc            /proc           procfs  rw      0       0"
-        cmd  = f"echo \"{line}\" >> {FSTAB}"
-
-        if Conf.contains_exact_line(FSTAB, line):
-            System.notify("c", f"Skipping: Not mounting proc. A proc entry already exists in '{FSTAB}'.")
-            return None
-
-        System.run(f"{cmd}")
-        return None
-
-    @staticmethod
-    def enable_exfatfs() -> None:
-        global config
-        todo("configure exfat support.")
-        return None
-
-    @staticmethod
-    def linux_compatability():
-        global config
-        todo("configure linux compatability.")
-        return None
-
-    @staticmethod
-    def setup_ports() -> bool:
-
-        ports_dir = "/usr/ports"
-        if os.path.exists(ports_dir):
-            System.notify("c", f"Skipping: Not setting up ports. Directory already exists: '{ports_dir}'.")
-            return False
-
-        System.run("git clone https://git.freebsd.org/ports.git /usr/ports")
-        todo("install a port manager.")
-        return True
 
     @staticmethod
     def add_skriptlins_to_path():
+        """NO ROOT"""
         skriptlins            = "skriptlins"
         skriptlins_source_dir = "./{skriptlins}"
 
@@ -409,6 +427,7 @@ class Configure:
 
     @staticmethod
     def start_x_after_login():
+        """NO ROOT"""
         home_dir = User.get_home()
         profile = f"{home_dir}/.profile"
 
@@ -430,6 +449,7 @@ class Configure:
 
     @staticmethod
     def xinitrc() -> None:
+        """NO ROOT"""
         xinitrc_personal =  f"{User.get_home()}/.xinitrc"
 
         # NOTE: Here's I'm defining custom keyboard options. 
@@ -648,8 +668,9 @@ if __name__ == "__main__":
     # Magic [TODO(explain)]
     exec(System.read_file_to_string(PACKAGE_FILE))
     #main()
-    System.install_packages()
-    Configure.doas()
+    #System.install_packages()
+    Configure.i3()
+    #Configure.doas()
     #Configure.graphics_driver()
     #Configure.reduce_memory()
     #Configure.mount_proc()

@@ -1,6 +1,5 @@
 #!/usr/local/bin/python3.11
 
-
 # This script should take a user from the bsdinstall (which sets up a minimal 
 # operating system that is not ready to be used as a personal computer in the 
 # modern day) to an MVP desktop environment.
@@ -34,6 +33,7 @@ class Config:
     setup_ports    : bool = False
     doas           : bool = False
     add_skriptlins_to_path     : bool = False
+
     
     # Requires GUI
     external_monitor: bool = False
@@ -298,6 +298,8 @@ class Configure:
             System.notify("c", msg)
             return
 
+        System.system(f"pkg install drm-kmod")
+        System.system(f"kldload {INTEL_MODULE}")
         System.kdl_list_add(INTEL_MODULE)
         return None
 
@@ -536,16 +538,11 @@ class System:
     def run(cmd) -> str:
         print(cmd)
         return os.popen(cmd).read()
+    
+    def system(cmd) -> object:
+        print(cmd)
+        return os.system(cmd)
 
-    async def runa(cmd) -> str:
-        proc = await asyncio.create_subprocess_shell(
-            cmd,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE
-        )
-        
-        stdout, stderr = await proc.communicate()
-        return stdout
 
     @staticmethod
     def error(msg) -> None:
@@ -569,8 +566,9 @@ class System:
         minimal_pkgs = " ".join(list(minimal_packages))
         extra_pkgs  = " ".join(list(extra_packages))
 
-        cmd = f"pkg install --dry-run --yes {minimal_pkgs} {extra_pkgs}"
-        System.run(cmd)
+        System.print("Installing packages. Will take some time...")
+        cmd = f"pkg install -y {minimal_pkgs} {extra_pkgs}"
+        System.system(cmd)
         return None
 
 
@@ -610,7 +608,7 @@ class System:
 
     @staticmethod
     def kdl_list_add(val: str) -> None:
-        System.run("sysrc kdl_load+={val}")
+        System.run(f"sysrc kdl_load+={val}")
 
     @staticmethod
     def file_append(file_path: str, to_append: str, newline: bool = True) -> None:
@@ -642,4 +640,10 @@ def todo(msg):
 if __name__ == "__main__":
     # Magic [TODO(explain)]
     exec(System.read_file_to_string(PACKAGE_FILE))
-    main()
+    #main()
+    System.install_packages()
+    #Configure.graphics_driver()
+    #Configure.reduce_memory()
+    #Configure.mount_proc()
+    #Configure.setup_ports()
+    #Configure.add_skriptlins_to_path()

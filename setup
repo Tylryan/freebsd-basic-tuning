@@ -162,7 +162,42 @@ class Prompt:
 class Configure:
 
     @staticmethod
+    def i3() -> None:
+        """NO ROOT"""
+        System.print("Configuring i3")
+        
+        # Copy config over
+        System.copy_i3_config()
+
+        # startx in .profile
+        Configure.start_x_after_login()
+
+        # setup .xinitrc
+        Configure.xinitrc()
+        Configure.git_ssh_keygen()
+
+        System.system(f"doas -u {User.get_name()} startx")
+        if config.external_monitor       : Configure.external_monitor()
+
+
+    @staticmethod
+    def git_ssh_keygen() -> None:
+
+        EMAIL = input("git.user.email: ")
+        NAME  = input("git.user.name: ")
+        System.system(f"git config --global user.name \"{NAME}\"")
+        System.system(f"git config --global user.email \"{EMAIL}\"")
+        #git config --global user.name NAME
+        #git config --global user.email EMAIL
+        System.system(f"ssh-keygen -t ed25519 -C \"{EMAIL}\"")
+
+        return None
+
+
+
+    @staticmethod
     def system() -> None:
+        """ROOT"""
         global config
         System.notify("c", "Configuring the system based on user inputs.")
 
@@ -276,21 +311,6 @@ class Configure:
         todo("install a port manager.")
         return True
 
-    @staticmethod
-    def i3() -> None:
-        """NO ROOT"""
-        System.print("Configuring i3")
-        
-        # Copy config over
-        System.copy_i3_config()
-        # startx in .profile
-        Configure.start_x_after_login()
-        # setup .xinitrc
-        Configure.xinitrc()
-
-        System.system("startx")
-
-        if config.external_monitor       : Configure.external_monitor()
 
 
     @staticmethod
@@ -525,6 +545,8 @@ class Conf:
 
     @staticmethod
     def append_line(conf_path: str, line: str) -> bool:
+        if os.path.exists(conf_path) is False:
+            System.run(f"touch {conf_path}")
         if Conf.contains_exact_line(conf_path, line):
             System.notify("c", f"Skipping: Not adding '{line}' to '{conf_path}': Already configured.")
             return False
@@ -667,11 +689,12 @@ def todo(msg):
 if __name__ == "__main__":
     # Magic [TODO(explain)]
     exec(System.read_file_to_string(PACKAGE_FILE))
+
     #main()
     #System.install_packages()
-    Configure.i3()
     #Configure.doas()
     #Configure.graphics_driver()
+    #Configure.i3()
     #Configure.reduce_memory()
     #Configure.mount_proc()
     #Configure.setup_ports()

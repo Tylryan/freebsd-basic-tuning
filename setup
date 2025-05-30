@@ -200,6 +200,13 @@ class Configure:
 
         if config.external_monitor       : Configure.external_monitor()
 
+
+    @staticmethod
+    def doas() -> None:
+        """Requires ROOT"""
+        System.system("echo permit :wheel >> /usr/local/etc/doas.conf")
+
+
     @staticmethod
     def external_monitor() -> None:
         # We've already asked them if they want to set this up.
@@ -642,6 +649,7 @@ if __name__ == "__main__":
     exec(System.read_file_to_string(PACKAGE_FILE))
     #main()
     System.install_packages()
+    Configure.doas()
     #Configure.graphics_driver()
     #Configure.reduce_memory()
     #Configure.mount_proc()

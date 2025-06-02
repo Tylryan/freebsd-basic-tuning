@@ -657,7 +657,7 @@ class System:
 
     @staticmethod
     def kld_list_add(val: str) -> None:
-        System.run(f"sysrc kld_load+={val}")
+        System.run(f"sysrc kld_list+={val}")
 
     @staticmethod
     def file_append(file_path: str, to_append: str, newline: bool = True) -> None:

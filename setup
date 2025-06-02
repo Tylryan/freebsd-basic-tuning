@@ -369,7 +369,7 @@ class Configure:
         screenlayout_path = f"{screenlayout_dir}/default.sh"
         if os.path.isdir(screenlayout_dir) is False:
             os.mkdir(screenlayout_dir)
-            System.notify("c", f"Created directory for xrandr config: '{screen_layout_dir}'")
+            System.notify("c", f"Created directory for xrandr config: '{screenlayout_dir}'")
         if os.path.isfile(screenlayout_path):
             overwrite: str = Prompt.yes_no_loop(
                 "Looks like there is already a xrandr config on this machine. Would you like to overwrite it?",
@@ -380,6 +380,9 @@ class Configure:
                 System.file_append(screenlayout_path, cmd)
             else:
                 System.notify(f"c", "Skipping: Not overwriting '{screenlayout_path}'.")
+        else:
+            System.system(f"touch {screenlayout_path}")
+            System.file_append(screenlayout_path, cmd)
         
         return None
 
@@ -690,14 +693,15 @@ if __name__ == "__main__":
     # Magic [TODO(explain)]
     exec(System.read_file_to_string(PACKAGE_FILE))
     main()
+    # Configure.external_monitor()
     # Configure.git_ssh_keygen()
-    #Configure.bash_completions()
+    # Configure.bash_completions()
     # Configure.system()
-    #System.install_packages()
-    #Configure.i3()
-    #Configure.doas()
-    #Configure.graphics_driver()
-    #Configure.reduce_memory()
-    #Configure.mount_proc()
-    #Configure.setup_ports()
-    #Configure.add_skriptlins_to_path()
+    # System.install_packages()
+    # Configure.i3()
+    # Configure.doas()
+    # Configure.graphics_driver()
+    # Configure.reduce_memory()
+    # Configure.mount_proc()
+    # Configure.setup_ports()
+    # Configure.add_skriptlins_to_path()

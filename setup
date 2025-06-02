@@ -172,6 +172,8 @@ class Configure:
         # startx in .profile
         Configure.start_x_after_login()
 
+        # enable doas
+        Configure.doas()
         # setup .xinitrc
         Configure.xinitrc()
         Configure.git_ssh_keygen()

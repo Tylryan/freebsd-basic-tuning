@@ -167,13 +167,8 @@ class Configure:
         System.print("Configuring i3")
         
         # Copy config over
-        System.copy_i3_config()
+        #System.copy_i3_config()
 
-        # startx in .profile
-        Configure.start_x_after_login()
-
-        # enable doas
-        Configure.doas()
         # setup .xinitrc
         Configure.xinitrc()
         Configure.git_ssh_keygen()
@@ -209,23 +204,17 @@ class Configure:
         if config.setup_ports            : Configure.setup_ports()
         #if config.add_skriptlins_to_path : Configure.add_skriptlins_to_path()
 
+        # Running these to as root to lock the files behind root.
         Configure.start_x_after_login()
         Configure.xinitrc()
+        # enable doas
+        Configure.doas()
 
 
         todo("setup mount.exfat for mounting vfat usb sticks.")
         todo("enable automount.")
 
         todo("enable linux compatability: chapter 12.")
-        # Config Files
-        todo(".config files: Rofi, i3")
-        todo("setup i3 to use better applications. Rofi/Firefox/Terminal")
-
-        # To be able to watch youtube videos for example.
-        todo("enable pulseaudio.")
-
-            
-
 
         return None
 
@@ -254,7 +243,7 @@ class Configure:
             System.notify("c", msg)
             return
 
-        System.system(f"pkg install drm-kmod")
+        System.system(f"pkg install -y drm-kmod")
         System.system(f"kldload {INTEL_MODULE}")
         System.kld_list_add(INTEL_MODULE)
         return None

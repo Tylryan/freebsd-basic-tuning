@@ -162,26 +162,8 @@ class Prompt:
 class Configure:
 
     @staticmethod
-    def i3() -> None:
-        """NO ROOT"""
-        System.print("Configuring i3")
-        
-        # Copy config over
-        #System.copy_i3_config()
-
-        # setup .xinitrc
-        Configure.xinitrc()
-        Configure.bash_completions()
-        Configure.git_ssh_keygen()
-
-        System.system(f"doas -u {User.get_name()} startx")
-        if config.external_monitor       : Configure.external_monitor()
-
-
-
-    @staticmethod
     def system() -> None:
-        """ROOT"""
+        """ROOT. This is the main configuration method when ran as root."""
         global config
         System.notify("c", "Configuring the system based on user inputs.")
 
@@ -204,6 +186,21 @@ class Configure:
         todo("enable linux compatability: chapter 12.")
 
         return None
+
+    @staticmethod
+    def i3() -> None:
+        """NO ROOT
+        This is the main configuration method when ran as a normal user."""
+        System.print("Configuring i3")
+        
+        Configure.bash_completions()
+        Configure.git_ssh_keygen()
+
+        System.system(f"doas -u {User.get_name()} startx")
+        if config.external_monitor       : Configure.external_monitor()
+
+
+
 
 
 
@@ -290,6 +287,18 @@ class Configure:
         return True
 
 
+    @staticmethod
+    def git_ssh_keygen() -> None:
+        """NO ROOT"""
+        git_username = input("Git Username: ")
+        git_email = input("Git Email: ")
+
+        System.system(f"git config --global user.name \"{git_username}\"")
+        System.system(f"git config --global user.email \"{git_email}\"")
+
+        System.system(f"ssh-keygen -t ed25519 -C \"{git_email}\"")
+        System.print("Your public key still needs to be added to Github")
+        return None
 
     @staticmethod
     def external_monitor() -> None:
@@ -680,8 +689,9 @@ def todo(msg):
 if __name__ == "__main__":
     # Magic [TODO(explain)]
     exec(System.read_file_to_string(PACKAGE_FILE))
-    #Configure.bash_completions()
     main()
+    # Configure.git_ssh_keygen()
+    #Configure.bash_completions()
     # Configure.system()
     #System.install_packages()
     #Configure.i3()

@@ -15,9 +15,9 @@ minimal_packages = (
 	"portconfig"    ,
 	"pulseaudio"    , # Required for playing audio in the browser.
 	"python311"     , # Required to even run the setup script.
-	"rofi"          , # "A window switcher, application launcher, ssh dialog, dmenu replacement and more".
 	"xorg"          , 
 	"xorg-server"   ,
+	"dmenu"         , # Application Selector
 )
 
 
@@ -47,4 +47,5 @@ extra_packages = (
 	"firefox"          , # Web Browser
 	"zathura"          , # A simple Document viewer.
 	"zathura-pdf-mupdf", # Support for PDF.
+	"rofi"          , # "A window switcher, application launcher, ssh dialog, dmenu replacement and more".
 )

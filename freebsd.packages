@@ -41,6 +41,7 @@ extra_packages = (
 	"less"             , # Alternative to `more`.
 	"kitty"            , # Alternative to `xterm`.
 	"py311-tldr"       , # Gives you the 'quick-and-dirty' of a command.
+	"gawk"             , # Useful scripting language for the command line.
 
 	# --------- Other Applications
 	"firefox"          , # Web Browser

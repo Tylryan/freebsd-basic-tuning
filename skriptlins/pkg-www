@@ -1,0 +1,16 @@
+#!/bin/sh
+
+# USAGE
+#   ./this-script package-name
+# 
+# DESCRIPTION
+# 	Usually opens the website which hosts the source code for a
+# 	given package.
+#   
+
+package=$1
+
+all_info=$(pkg info ${package} | grep WWW)
+website=$(echo $all_info | awk '{print $3}')
+
+xdg-open $website

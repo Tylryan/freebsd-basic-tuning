@@ -205,7 +205,7 @@ class Configure:
         if config.reduce_memory          : Configure.reduce_memory()
         if config.mount_proc             : Configure.mount_proc()
         if config.setup_ports            : Configure.setup_ports()
-        if config.add_skriptlins_to_path : Configure.add_skriptlins_to_path()
+        #if config.add_skriptlins_to_path : Configure.add_skriptlins_to_path()
 
         Configure.start_x_after_login()
         Configure.xinitrc()
@@ -254,7 +254,7 @@ class Configure:
 
         System.system(f"pkg install drm-kmod")
         System.system(f"kldload {INTEL_MODULE}")
-        System.kdl_list_add(INTEL_MODULE)
+        System.kld_list_add(INTEL_MODULE)
         return None
 
     @staticmethod
@@ -656,8 +656,8 @@ class System:
         return System.read_file_to_string(path).split("\n")
 
     @staticmethod
-    def kdl_list_add(val: str) -> None:
-        System.run(f"sysrc kdl_load+={val}")
+    def kld_list_add(val: str) -> None:
+        System.run(f"sysrc kld_load+={val}")
 
     @staticmethod
     def file_append(file_path: str, to_append: str, newline: bool = True) -> None:
@@ -689,12 +689,12 @@ def todo(msg):
 if __name__ == "__main__":
     # Magic [TODO(explain)]
     exec(System.read_file_to_string(PACKAGE_FILE))
-
-    #main()
+    main()
+    # Configure.system()
     #System.install_packages()
+    #Configure.i3()
     #Configure.doas()
     #Configure.graphics_driver()
-    #Configure.i3()
     #Configure.reduce_memory()
     #Configure.mount_proc()
     #Configure.setup_ports()

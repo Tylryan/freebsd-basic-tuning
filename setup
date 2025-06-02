@@ -171,24 +171,11 @@ class Configure:
 
         # setup .xinitrc
         Configure.xinitrc()
+        Configure.bash_completions()
         Configure.git_ssh_keygen()
 
         System.system(f"doas -u {User.get_name()} startx")
         if config.external_monitor       : Configure.external_monitor()
-
-
-    @staticmethod
-    def git_ssh_keygen() -> None:
-
-        EMAIL = input("git.user.email: ")
-        NAME  = input("git.user.name: ")
-        System.system(f"git config --global user.name \"{NAME}\"")
-        System.system(f"git config --global user.email \"{EMAIL}\"")
-        #git config --global user.name NAME
-        #git config --global user.email EMAIL
-        System.system(f"ssh-keygen -t ed25519 -C \"{EMAIL}\"")
-
-        return None
 
 
 
@@ -485,6 +472,19 @@ class Configure:
 
         return None
 
+    @staticmethod
+    def bash_completions() -> None:
+        """NO ROOT"""
+        	# BASH-COMPLETION requires you to have this in your .bashrc file:
+        bash_rc =  f"{User.get_home()}/.bashrc"
+
+        cmdp1 = """[[ $PS1 && -f /usr/local/share/bash-completion/bash_completion.sh ]] && \\
+source /usr/local/share/bash-completion/bash_completion.sh"""
+
+        Conf.append_line(bash_rc, cmdp1)
+        return None
+
+
 
 
 class Conf:
@@ -680,6 +680,7 @@ def todo(msg):
 if __name__ == "__main__":
     # Magic [TODO(explain)]
     exec(System.read_file_to_string(PACKAGE_FILE))
+    #Configure.bash_completions()
     main()
     # Configure.system()
     #System.install_packages()

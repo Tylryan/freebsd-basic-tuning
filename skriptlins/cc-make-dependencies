@@ -1,0 +1,49 @@
+#!/bin/sh
+
+# USAGE
+# 	make [depend]
+#
+# DESCRIPTION
+# 	This essentially solves lack of a "helper file"
+# 	concept in Make. A helper file being one required
+# 	for time comparison against the target, but is
+# 	not used in an actual shell command. E.g. The
+# 	header files.
+#
+# EXAMPLE
+# 	Run `$ make depend`, then change a header file (which
+# 	you should not have specified as a prerequisite file
+# 	in your make file).
+#
+# 	Then change a header file and run `$ make`. You should
+# 	notice that even though you have not specified that the
+# 	header files should be watched, updating them results
+# 	in the correct Make rule being executed.
+#
+# ALL SOURCE FILES
+# - main.c person.h
+# - bird.o bird.h
+#
+# NOTES
+# - I found this gem in FreeBSD's "Developer's Handbook" (2.5.3).
+#
+# EXAMPLE MAKEFILE
+#	main: main.o bird.o
+#		# Evidently in FreeBSD, $^ is $> ...
+#		echo $> && echo $@
+#		cc main.o bird.o -o main
+#	
+#	# Make sure to run this every time you add a .h file to
+#	# your project.
+#	depend:
+#		cc -E -MM *.c > .depend
+#	
+#	# Include this .depend file. If you update a header
+#	# file, then
+#	include .depend
+#
+
+
+# This will search your .c files for .h file dependencies and spit 
+# them out as rules in a Make file called ".depend".
+cc -E -MM *.c > .depend
